@@ -147,6 +147,7 @@ GEM
     crass (1.0.3)
     css_parser (1.6.0)
       addressable
+    database_cleaner (1.6.2)
     deface (1.0.2)
       colorize (>= 0.5.8)
       nokogiri (~> 1.6.0)
@@ -331,6 +332,7 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 1.16)
   coffee-rails
+  database_cleaner
   factory_bot
   rake (~> 10.0)
   rspec

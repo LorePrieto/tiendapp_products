@@ -20,3 +20,5 @@ RSpec.configure do |config|
   config.include Spree::TestingSupport::Preferences
   config.include Spree::TestingSupport::UrlHelpers
 end
+
+Dir[File.join(File.dirname(__FILE__), 'support/**/*.rb')].each { |file| require file } 
