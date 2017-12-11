@@ -1,2 +1,15 @@
-require "bundler/gem_tasks"
-task :default => :spec
+require 'bundler'
+Bundler::GemHelper.install_tasks
+
+require 'rspec/core/rake_task'
+require 'spree/testing_support/extension_rake'
+
+RSpec::Core::RakeTask.new
+
+task :default => [:spec]
+
+desc 'Generates a dummy app for testing'
+task :test_app do
+  ENV['LIB_NAME'] = 'tiendapp_products'
+  Rake::Task['common:test_app'].invoke
+end
