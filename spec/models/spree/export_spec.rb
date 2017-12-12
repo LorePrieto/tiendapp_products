@@ -46,6 +46,7 @@ RSpec.describe TiendappProducts::Export do
         expect(xlsx.sheet("Propiedades").row(1)).to eql(["ID Producto", "Propiedad", "Valor"])
         expect(xlsx.sheet("Opciones").row(1)).to eql(["ID Producto", "Opción", "Valores" ])
         expect(xlsx.sheet("Variantes").row(1)).to eql(["ID", "ID Producto", "Opciones", "SKU", "Precio", "Peso", "Altura", "Longitud", "Profundidad"])
+        expect(xlsx.sheet("Ubicaciones").row(1)).to eql(["ID", "Nombre", "Nombre Interno", "Calle", "Ciudad", "Calle de referencia", "Código Postal", "Teléfono", "País", "Región", "Activa", "Por defecto", "Backorderable", "Propagar por todas las variantes"])
         expect(xlsx.sheet("Stock").row(1)).to eql(["ID Producto", "ID Variante", "Cantidad", "ID Ubicación", "Backorderable"])
         #Products
         expect(xlsx.sheet("Productos").row(2)).to eql([1.0, "queque", "en molde de cupcake", 1500.0, "N/A", "N/A", "N/A", "N/A", "N/A", "queque-en-molde-de-cupcake", "Este es el mejor queque de Chile", "Sí", "2017-12-06 17:26:02 UTC", "TODO" ])
