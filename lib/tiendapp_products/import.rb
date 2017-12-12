@@ -5,7 +5,39 @@ module TiendappProducts
     def self.create_products(path)
       xlsx = Roo::Spreadsheet.open(path)
       if !self.is_not_a_correct_excel(xlsx)
-        return "Buyyaaah!!"
+        # Products
+        prod_dic = {}
+        ((xlsx.sheet("Productos").first_row + 1)..xlsx.sheet("Productos").last_row.to_i).each do |r|
+          row = xlsx.sheet("Productos").row(r)
+          if row[14] != "Por defecto"
+            sc = Spree::ShippingCategory.create!(name: row[14].to_s)
+          else
+            sc = Spree::ShippingCategory.where(name: "Por defecto").any? ? Spree::ShippingCategory.where(name: "Por defecto").first : Spree::ShippingCategory.create!(name: "Por defecto")
+          end
+          pr = Spree::Product.create!(name: row[1].to_s, description: row[2].to_s, price: row[3].to_i, slug: row[9].to_s, meta_description: row[10].to_s, available_on: DateTime.parse(row[12].to_s).to_date,  shipping_category_id: sc.id)
+          prod_dic[row[0].to_i] = row[9].to_s
+        end
+        #Properties
+        ((xlsx.sheet("Propiedades").first_row + 1)..xlsx.sheet("Propiedades").last_row.to_i).each do |r|
+          row = xlsx.sheet("Propiedades").row(r)
+          pr = Spree::Product.where(slug: prod_dic[row[0].to_i]).first
+          property = Spree::Property.create!(name: row[1].to_s, presentation: row[2].to_s)
+          pr.properties << property
+        end
+        #Options
+        ((xlsx.sheet("Opciones").first_row + 1)..xlsx.sheet("Opciones").last_row.to_i).each do |r|
+          row = xlsx.sheet("Opciones").row(r)
+          pr = Spree::Product.where(slug: prod_dic[row[0].to_i]).first
+          ot = Spree::OptionType.where(name: row[1].to_s).any? ? Spree::OptionType.where(name: row[1].to_s).first : Spree::OptionType.create!(name: row[1].to_s, presentation: row[1].to_s)
+          Spree::ProductOptionType.create!(position: 1, product_id: pr.id, option_type_id: ot.id)
+          values = row[2].split(',')
+          values.each do |v|
+            opv1 = Spree::OptionValue.create!(name: v.strip, presentation: v.strip, option_type_id: ot.id)
+          end
+        end
+        #variants
+        #Locations
+        #Stock
       end
     end
 
@@ -33,7 +65,7 @@ module TiendappProducts
         return "No hay una hoja de Stock"
       end
       #Has the correct headers in the tabs
-      if xlsx.sheet("Productos").row(1) != ["ID", "Nombre", "Descripción", "Precio Principal", "SKU", "Peso", "Altura", "Longitud", "Profundidad", "Slug", "Descripción Meta", "Visible", "Disponible en", "Categorías" ]
+      if xlsx.sheet("Productos").row(1) != ["ID", "Nombre", "Descripción", "Precio Principal", "SKU", "Peso", "Altura", "Longitud", "Profundidad", "Slug", "Descripción Meta", "Visible", "Disponible en", "Categorías",  "Categoría de Shipping"]
         return "Los headers en la hoja Productos no son correctos"
       end
       if xlsx.sheet("Propiedades").row(1) != ["ID Producto", "Propiedad", "Valor"]
