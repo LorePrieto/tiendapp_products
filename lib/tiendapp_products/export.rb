@@ -2,9 +2,6 @@ module TiendappProducts
   class Export
     require 'axlsx'
 
-##<Spree::Product id: nil, name: "Fran", description: nil, available_on: nil, deleted_at: nil, slug: nil, meta_description: nil, meta_keywords: nil, tax_category_id: nil, shipping_category_id: nil, created_at: nil, updated_at: nil, promotionable: true, meta_title: nil>
-
-
     def self.get_products
       Axlsx::Package.new do |p|
         p.workbook.add_worksheet(:name => "Productos") do |sheet|
@@ -36,9 +33,32 @@ module TiendappProducts
         end
         p.workbook.add_worksheet(:name => "Variantes") do |sheet|
           sheet.add_row ["ID", "ID Producto", "Opciones", "SKU", "Precio", "Peso", "Altura", "Longitud", "Profundidad"]
+          Spree::Product.all.each do |product|
+            product.variants.each do |variant|
+              values = variant.option_values
+              val = values.first.name
+              values.drop(1).each do |v|
+                val = val + ", " + v.name
+              end
+              sheet.add_row [variant.id, product.id, val, variant.sku, variant.price, variant.weight, variant.height, variant.width, variant.depth]
+            end
+          end
+        end
+        p.workbook.add_worksheet(:name => "Ubicaciones") do |sheet|
+          sheet.add_row ["ID", "Nombre", "Nombre Interno", "Calle", "Ciudad", "Calle de referencia", "Código Postal", "Teléfono", "País", "Región", "Activa", "Por defecto", "Backorderable", "Propagar por todas las variantes"]
+          Spree::StockLocation.all.each do |location|
+              sheet.add_row [location.id, location.name, location.admin_name, location.address1, location.city, location.address2, location.zipcode, location.phone, location.country.name, location.state.name, location.active ? "Sí" : "No", location.default ? "Sí" : "No", location.backorderable_default ? "Sí" : "No", location.propagate_all_variants ? "Sí" : "No" ]
+          end
         end
         p.workbook.add_worksheet(:name => "Stock") do |sheet|
-          sheet.add_row ["ID Producto", "ID Variante", "Cantidad", "Ubicación", "Backorderable"]
+          sheet.add_row ["ID Producto", "ID Variante", "Cantidad", "ID Ubicación", "Backorderable"]
+          Spree::Product.all.each do |product|
+            product.variants.each do |variant|
+              variant.stock_items.each do |stock|
+                sheet.add_row [product.id, variant.id, stock.count_on_hand, stock.stock_location_id, stock.backorderable ? "Sí" : "No" ]
+              end
+            end
+          end
         end
         p.serialize('spec/fixtures/exported.xlsx')
       end
