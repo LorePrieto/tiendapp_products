@@ -7,7 +7,12 @@ module TiendappProducts
         p.workbook.add_worksheet(:name => "Productos") do |sheet|
           sheet.add_row ["ID", "Nombre", "Descripción", "Precio Principal", "SKU", "Peso", "Altura", "Longitud", "Profundidad", "Slug", "Descripción Meta", "Visible", "Disponible en", "Categorías" ]
           Spree::Product.all.each do |product|
-            sheet.add_row [product.id, product.name, product.description, product.price, "TODO", "TODO", "TODO", "TODO", "TODO", product.slug, product.meta_description, "TODO", product.available_on.to_s, "TODO" ]
+            var = Spree::Variant.where(product_id: product.id).where(is_master: true).first
+            if product.variants.count > 0
+              sheet.add_row [product.id, product.name, product.description, product.price, "N/A", "N/A", "N/A", "N/A", "N/A", product.slug, product.meta_description, "TODO", product.available_on.to_s, "TODO" ]
+            else
+              sheet.add_row [product.id, product.name, product.description, product.price, var.sku, var.weight, var.height, var.width, var.depth, product.slug, product.meta_description, "TODO", product.available_on.to_s, "TODO" ]
+            end
           end
         end
         p.workbook.add_worksheet(:name => "Propiedades") do |sheet|
