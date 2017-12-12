@@ -7,3 +7,5 @@
 /spec/reports/
 /tmp/
 /spec/dummy/
+/spec/fixtures/exported.xlsx
+
