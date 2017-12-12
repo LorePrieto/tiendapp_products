@@ -2,7 +2,7 @@ module TiendappProducts
   class Export
     require 'axlsx'
 
-    def self.get_products
+    def self.get_products(path)
       Axlsx::Package.new do |p|
         p.workbook.add_worksheet(:name => "Productos") do |sheet|
           sheet.add_row ["ID", "Nombre", "Descripción", "Precio Principal", "SKU", "Peso", "Altura", "Longitud", "Profundidad", "Slug", "Descripción Meta", "Visible", "Disponible en", "Categorías" ]
@@ -65,7 +65,7 @@ module TiendappProducts
             end
           end
         end
-        p.serialize('spec/fixtures/exported.xlsx')
+        p.serialize(path)
       end
     end
   end

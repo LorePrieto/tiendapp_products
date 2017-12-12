@@ -1,9 +1,8 @@
 require 'spec_helper'
 require 'roo'
-require 'tiendapp_products/export'
 
-RSpec.describe Spree::Product do
-  describe "Exported excel have correct content" do
+RSpec.describe TiendappProducts::Export do
+  describe "A excel is created with the correct content from Spree" do
       it "should create an excel with correct content in simple case" do
         # We create an object in the database
         #Product
@@ -37,7 +36,7 @@ RSpec.describe Spree::Product do
         Spree::StockMovement.create!(stock_item_id: vr.stock_items.first.id, quantity: 20)
 
         # We ask the gem to create the excel
-        TiendappProducts::Export.get_products()
+        TiendappProducts::Export.get_products('spec/fixtures/exported.xlsx')
 
         # We check that the excel holds the correct values
         #Headers
@@ -77,7 +76,7 @@ RSpec.describe Spree::Product do
         var.save!
 
         # We ask the gem to create the excel
-        TiendappProducts::Export.get_products()
+        TiendappProducts::Export.get_products('spec/fixtures/exported.xlsx')
 
         # We check that the excel holds the correct values
         xlsx = Roo::Spreadsheet.open('spec/fixtures/exported.xlsx')
@@ -99,7 +98,7 @@ RSpec.describe Spree::Product do
         var.save!
 
         # We ask the gem to create the excel
-        TiendappProducts::Export.get_products()
+        TiendappProducts::Export.get_products('spec/fixtures/exported.xlsx')
 
         # We check that the excel holds the correct values
         xlsx = Roo::Spreadsheet.open('spec/fixtures/exported.xlsx')
