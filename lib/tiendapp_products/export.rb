@@ -5,13 +5,13 @@ module TiendappProducts
     def self.get_products(path)
       Axlsx::Package.new do |p|
         p.workbook.add_worksheet(:name => "Productos") do |sheet|
-          sheet.add_row ["ID", "Nombre", "Descripción", "Precio Principal", "SKU", "Peso", "Altura", "Longitud", "Profundidad", "Slug", "Descripción Meta", "Visible", "Disponible en", "Categorías" ]
+          sheet.add_row ["ID", "Nombre", "Descripción", "Precio Principal", "SKU", "Peso", "Altura", "Longitud", "Profundidad", "Slug", "Descripción Meta", "Visible", "Disponible en", "Categorías", "Categoría de Shipping" ]
           Spree::Product.all.each do |product|
             var = Spree::Variant.where(product_id: product.id).where(is_master: true).first
             if product.variants.count > 0
-              sheet.add_row [product.id, product.name, product.description, product.price, "N/A", "N/A", "N/A", "N/A", "N/A", product.slug, product.meta_description, product.available? ? "Sí" : "No", product.available_on.to_s, "TODO" ]
+              sheet.add_row [product.id, product.name, product.description, product.price, "N/A", "N/A", "N/A", "N/A", "N/A", product.slug, product.meta_description, product.available? ? "Sí" : "No", product.available_on.to_s, "TODO", product.shipping_category.name]
             else
-              sheet.add_row [product.id, product.name, product.description, product.price, var.sku, var.weight, var.height, var.width, var.depth, product.slug, product.meta_description, product.available? ? "Sí" : "No", product.available_on.to_s, "TODO" ]
+              sheet.add_row [product.id, product.name, product.description, product.price, var.sku, var.weight, var.height, var.width, var.depth, product.slug, product.meta_description, product.available? ? "Sí" : "No", product.available_on.to_s, "TODO", product.shipping_category.name]
             end
           end
         end
