@@ -21,8 +21,9 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_runtime_dependency 'spree_core', '~> 3.0.4'
-  spec.add_runtime_dependency 'axlsx', "~> 2.0.1"
-  spec.add_runtime_dependency "roo", "~> 1.13.2"
+  spec.add_runtime_dependency 'axlsx', "~> 1.3.6"
+  spec.add_runtime_dependency 'zip-zip'
+  spec.add_runtime_dependency "roo", "~> 2.7.1"
 
   spec.add_development_dependency "bundler", "~> 1.16"
   spec.add_development_dependency "rake", "~> 10.0"

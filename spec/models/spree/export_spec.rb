@@ -7,7 +7,7 @@ RSpec.describe TiendappProducts::Export do
         # We create an object in the database
         #Product
         sc = Spree::ShippingCategory.create!(name:"Por defecto")
-        pr = Spree::Product.create!(name:"queque", price:"1500", description: "en molde de cupcake", slug: "queque-en-molde-de-cupcake", meta_description: "Este es el mejor queque de Chile", available_on: "2017-12-06",  shipping_category_id: sc.id)
+        pr = Spree::Product.create!(name:"queque", price:1500, description: "en molde de cupcake", slug: "queque-en-molde-de-cupcake", meta_description: "Este es el mejor queque de Chile", available_on: "2017-12-06",  shipping_category_id: sc.id)
         #Properties
         p1 = Spree::Property.create!(name: "Hecho en casa", presentation: "Sí")
         p2 = Spree::Property.create!(name: "For real no fake", presentation: "No")
@@ -49,25 +49,25 @@ RSpec.describe TiendappProducts::Export do
         expect(xlsx.sheet("Ubicaciones").row(1)).to eql(["Nombre", "Nombre Interno", "Calle", "Ciudad", "Calle de referencia", "Código Postal", "Teléfono", "País", "Región", "Activa", "Por defecto", "Backorderable", "Propagar por todas las variantes"])
         expect(xlsx.sheet("Stock").row(1)).to eql(["ID Producto", "Ubicación (Nom. Interno)", "ID Variante", "Cantidad", "Backorderable"])
         #Products
-        expect(xlsx.sheet("Productos").row(2)).to eql([1.0, "queque", "en molde de cupcake", 1500.0, "N/A", "N/A", "N/A", "N/A", "N/A", "queque-en-molde-de-cupcake", "Este es el mejor queque de Chile", "Sí", "2017-12-06", "", "Por defecto" ])
+        expect(xlsx.sheet("Productos").row(2)).to eql([1, "queque", "en molde de cupcake", 1500.0, "N/A", "N/A", "N/A", "N/A", "N/A", "queque-en-molde-de-cupcake", "Este es el mejor queque de Chile", "Sí", "2017-12-06", "", "Por defecto" ])
         #Properties
-        expect(xlsx.sheet("Propiedades").row(2)).to eql([1.0, "Hecho en casa", "Sí"])
-        expect(xlsx.sheet("Propiedades").row(3)).to eql([1.0, "For real no fake", "No"])
+        expect(xlsx.sheet("Propiedades").row(2)).to eql([1, "Hecho en casa", "Sí"])
+        expect(xlsx.sheet("Propiedades").row(3)).to eql([1, "For real no fake", "No"])
         #Options
-        expect(xlsx.sheet("Opciones").row(2)).to eql([1.0, "Sabor", "Nueces, Vainilla"])
-        expect(xlsx.sheet("Opciones").row(3)).to eql([1.0, "Tamaño", "estoy a dieta, gigante"])
+        expect(xlsx.sheet("Opciones").row(2)).to eql([1, "Sabor", "Nueces, Vainilla"])
+        expect(xlsx.sheet("Opciones").row(3)).to eql([1, "Tamaño", "estoy a dieta, gigante"])
         #Variants
-        expect(xlsx.sheet("Variantes").row(2)).to eql([2.0, 1.0, "Nueces, estoy a dieta", 12345678.0, 2000.0, 200.0, 10.0, 10.0, 10.0])
+        expect(xlsx.sheet("Variantes").row(2)).to eql([2, 1, "Nueces, estoy a dieta", 12345678, 2000.0, 200.0, 10.0, 10.0, 10.0])
         #Locations
-        expect(xlsx.sheet("Ubicaciones").row(2)).to eql(["Isla Diamante", "Central", "Playa 123", "Til Til", "Juan algo 234", 12345.0, 76543469.0, "Chile","Región Metropolitana", "Sí", "No", "Sí", "Sí"])
+        expect(xlsx.sheet("Ubicaciones").row(2)).to eql(["Isla Diamante", "Central", "Playa 123", "Til Til", "Juan algo 234", 12345, 76543469, "Chile","Región Metropolitana", "Sí", "No", "Sí", "Sí"])
         #Stock
-        expect(xlsx.sheet("Stock").row(2)).to eql([1.0, "Central", 2.0, 20.0, "Sí"])
+        expect(xlsx.sheet("Stock").row(2)).to eql([1, "Central", 2, 20, "Sí"])
       end
       it "should only add SKU, weight, etc in products tab if there is no variants " do
         # We create an object in the database
         #Product
         sc = Spree::ShippingCategory.create!(name:"Por defecto")
-        pr = Spree::Product.create!(name:"queque", price:"1500", description: "en molde de cupcake", slug: "queque-en-molde-de-cupcake", meta_description: "Este es el mejor queque de Chile", available_on: "2017-12-06",  shipping_category_id: sc.id)
+        pr = Spree::Product.create!(name:"queque", price:1500, description: "en molde de cupcake", slug: "queque-en-molde-de-cupcake", meta_description: "Este es el mejor queque de Chile", available_on: "2017-12-06",  shipping_category_id: sc.id)
         var = Spree::Variant.where(product_id: pr.id).first
         var.sku = "234566"
         var.width = 134
@@ -82,14 +82,14 @@ RSpec.describe TiendappProducts::Export do
         # We check that the excel holds the correct values
         xlsx = Roo::Spreadsheet.open('spec/fixtures/exported.xlsx')
         #Products
-        expect(xlsx.sheet("Productos").row(2)).to eql([1.0, "queque", "en molde de cupcake", 1500.0, 234566.0, 123.0, 132.0, 134.0, 234.0, "queque-en-molde-de-cupcake", "Este es el mejor queque de Chile", "Sí", "2017-12-06", "", "Por defecto" ])
+        expect(xlsx.sheet("Productos").row(2)).to eql([1, "queque", "en molde de cupcake", 1500.0, 234566, 123.0, 132.0, 134.0, 234.0, "queque-en-molde-de-cupcake", "Este es el mejor queque de Chile", "Sí", "2017-12-06", "", "Por defecto" ])
       end
       it "should print No in visible" do
         # We create an object in the database
         #Product
         t = (Date.current + 3).strftime("%Y-%m-%d")
         sc = Spree::ShippingCategory.create!(name:"Por defecto")
-        pr = Spree::Product.create!(name:"queque", price:"1500", description: "en molde de cupcake", slug: "queque-en-molde-de-cupcake", meta_description: "Este es el mejor queque de Chile", available_on: t,  shipping_category_id: sc.id)
+        pr = Spree::Product.create!(name:"queque", price:1500, description: "en molde de cupcake", slug: "queque-en-molde-de-cupcake", meta_description: "Este es el mejor queque de Chile", available_on: t,  shipping_category_id: sc.id)
 
         # We ask the gem to create the excel
         TiendappProducts::Export.get_products('spec/fixtures/exported.xlsx')
@@ -103,7 +103,7 @@ RSpec.describe TiendappProducts::Export do
         # We create an object in the database
         #Product
         sc = Spree::ShippingCategory.create!(name:"Por defecto")
-        pr = Spree::Product.create!(name:"queque", price:"1500", description: "en molde de cupcake", slug: "queque-en-molde-de-cupcake", meta_description: "Este es el mejor queque de Chile", available_on: "2017-12-06",  shipping_category_id: sc.id)
+        pr = Spree::Product.create!(name:"queque", price:1500, description: "en molde de cupcake", slug: "queque-en-molde-de-cupcake", meta_description: "Este es el mejor queque de Chile", available_on: "2017-12-06",  shipping_category_id: sc.id)
         #Categories
         ty = Spree::Taxonomy.create!(name: "riri")
         t1 = Spree::Taxon.where(taxonomy_id: ty.id).first
