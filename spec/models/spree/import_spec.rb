@@ -68,7 +68,7 @@ RSpec.describe TiendappProducts::Import do
     end
     it "should change master variant if product data is distinct" do
       #We load the excel
-      TiendappProducts::Import.create_products('spec/fixtures/imported_t2.xlsx')
+      TiendappProducts::Import.create_products('spec/fixtures/imported.xlsx')
 
       #Check the database for the correct entries
       product = Spree::Product.where(slug: "queque-en-molde-de-cupcake").first
