@@ -16,6 +16,25 @@ module TiendappProducts
           end
           pr = Spree::Product.create!(name: row[1].to_s, description: row[2].to_s, price: row[3].to_i, slug: row[9].to_s, meta_description: row[10].to_s, available_on: DateTime.parse(row[12].to_s).to_date,  shipping_category_id: sc.id)
           prod_dic[row[0].to_i] = row[9].to_s
+          if row[4].to_s != "N/A" || row[5].to_s != "N/A" || row[6].to_s != "N/A" || row[7].to_s != "N/A" || row[8].to_s != "N/A"
+            vr = Spree::Variant.where(product_id: pr.id, is_master: true).first
+            if row[4].to_s != "N/A"
+              vr.sku = row[4].to_i.to_s
+            end
+            if row[5].to_s != "N/A"
+              vr.weight = row[5].to_f
+            end
+            if row[6].to_s != "N/A"
+              vr.height = row[6].to_f
+            end
+            if row[7].to_s != "N/A"
+              vr.width = row[7].to_f
+            end
+            if row[8].to_s != "N/A"
+              vr.depth = row[8].to_f
+            end
+            vr.save
+          end
         end
         #Properties
         ((xlsx.sheet("Propiedades").first_row + 1)..xlsx.sheet("Propiedades").last_row.to_i).each do |r|

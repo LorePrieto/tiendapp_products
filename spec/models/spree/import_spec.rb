@@ -66,5 +66,18 @@ RSpec.describe TiendappProducts::Import do
       expect(item.backorderable).to eql(true)
       expect(item.count_on_hand).to eql(20)
     end
+    it "should change master variant if product data is distinct" do
+      #We load the excel
+      TiendappProducts::Import.create_products('spec/fixtures/imported_t2.xlsx')
+
+      #Check the database for the correct entries
+      product = Spree::Product.where(slug: "queque-en-molde-de-cupcake").first
+      vr = Spree::Variant.where(product_id: product.id, is_master: true).first
+      expect(vr.sku).to eql("87654321")
+      expect(vr.weight).to eql(200.0)
+      expect(vr.height).to eql(10.0)
+      expect(vr.width).to eql(10.0)
+      expect(vr.depth).to eql(10.0)
+    end
   end
 end
