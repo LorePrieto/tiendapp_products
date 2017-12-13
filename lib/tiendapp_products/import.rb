@@ -35,6 +35,16 @@ module TiendappProducts
             end
             vr.save
           end
+          taxons = row[13].to_s.split(', ')
+          taxons.each do |taxon|
+            taxs = taxon.split('->')
+            ty = Spree::Taxonomy.where(name: taxs.first).any? ? Spree::Taxonomy.where(name: taxs.first).first : Spree::Taxonomy.create!(name: taxs.first)
+            tp = Spree::Taxon.where(taxonomy_id: ty.id).first
+            taxs.drop(1).each do |tax|
+              tp = Spree::Taxon.create(name: tax, parent_id: tp.id, taxonomy_id: ty.id)
+            end
+            pr.taxons << tp
+          end
         end
         #Properties
         ((xlsx.sheet("Propiedades").first_row + 1)..xlsx.sheet("Propiedades").last_row.to_i).each do |r|

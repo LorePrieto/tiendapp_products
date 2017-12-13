@@ -79,5 +79,27 @@ RSpec.describe TiendappProducts::Import do
       expect(vr.width).to eql(10.0)
       expect(vr.depth).to eql(10.0)
     end
+    it "should create the correct taxonomies (and taxons)" do
+      #We load the excel
+      TiendappProducts::Import.create_products('spec/fixtures/imported.xlsx')
+
+      #Check the database for the correct entries
+      product = Spree::Product.where(slug: "queque-en-molde-de-cupcake").first
+      taxons = product.taxons
+      t1 = taxons.first
+      ty = Spree::Taxonomy.find(t1.taxonomy_id)
+      expect(t1.name).to eql("rere")
+      expect(ty.name).to eql("riri")
+      t2 = Spree::Taxon.find(t1.parent_id)
+      expect(t2.name).to eql("ruru")
+      expect(t2.taxonomy_id).to eql(ty.id)
+      t3 = Spree::Taxon.find(t2.parent_id)
+      expect(t3.name).to eql("riri")
+      expect(t3.taxonomy_id).to eql(ty.id)
+      t1 = taxons.second
+      ty = Spree::Taxonomy.find(t1.taxonomy_id)
+      expect(t1.name).to eql("coco")
+      expect(ty.name).to eql("coco")
+    end
   end
 end
