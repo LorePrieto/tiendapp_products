@@ -5,17 +5,26 @@ module TiendappProducts
     def self.get_products(path)
       if path.split('.').last != "xlsx"
         puts "Error: the file extension need to be xlsx"
-        return 
+        return
       end
       Axlsx::Package.new do |p|
         p.workbook.add_worksheet(:name => "Productos") do |sheet|
           sheet.add_row ["ID", "Nombre", "Descripción", "Precio Principal", "SKU", "Peso", "Altura", "Longitud", "Profundidad", "Slug", "Descripción Meta", "Visible", "Disponible en", "Categorías", "Categoría de Shipping" ]
           Spree::Product.all.each do |product|
             var = Spree::Variant.where(product_id: product.id).where(is_master: true).first
-            if product.variants.count > 0
-              sheet.add_row [product.id, product.name, product.description, product.price, "N/A", "N/A", "N/A", "N/A", "N/A", product.slug, product.meta_description, product.available? ? "Sí" : "No", product.available_on.strftime("%Y-%m-%d"), "TODO", product.shipping_category.name]
+            taxons = product.taxons
+            if taxons.any?
+              tax = taxons.first.permalink.gsub('/', '->')
+              taxons.drop(1).each do |taxon|
+                tax = tax + ', ' + taxon.permalink.gsub('/', '->')
+              end
             else
-              sheet.add_row [product.id, product.name, product.description, product.price, var.sku, var.weight, var.height, var.width, var.depth, product.slug, product.meta_description, product.available? ? "Sí" : "No", product.available_on.strftime("%Y-%m-%d"), "TODO", product.shipping_category.name]
+              tax = ""
+            end
+            if product.variants.count > 0
+              sheet.add_row [product.id, product.name, product.description, product.price, "N/A", "N/A", "N/A", "N/A", "N/A", product.slug, product.meta_description, product.available? ? "Sí" : "No", product.available_on.strftime("%Y-%m-%d"), tax, product.shipping_category.name]
+            else
+              sheet.add_row [product.id, product.name, product.description, product.price, var.sku, var.weight, var.height, var.width, var.depth, product.slug, product.meta_description, product.available? ? "Sí" : "No", product.available_on.strftime("%Y-%m-%d"), tax, product.shipping_category.name]
             end
           end
         end

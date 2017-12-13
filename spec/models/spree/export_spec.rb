@@ -49,7 +49,7 @@ RSpec.describe TiendappProducts::Export do
         expect(xlsx.sheet("Ubicaciones").row(1)).to eql(["Nombre", "Nombre Interno", "Calle", "Ciudad", "Calle de referencia", "Código Postal", "Teléfono", "País", "Región", "Activa", "Por defecto", "Backorderable", "Propagar por todas las variantes"])
         expect(xlsx.sheet("Stock").row(1)).to eql(["ID Producto", "Ubicación (Nom. Interno)", "ID Variante", "Cantidad", "Backorderable"])
         #Products
-        expect(xlsx.sheet("Productos").row(2)).to eql([1.0, "queque", "en molde de cupcake", 1500.0, "N/A", "N/A", "N/A", "N/A", "N/A", "queque-en-molde-de-cupcake", "Este es el mejor queque de Chile", "Sí", "2017-12-06", "TODO", "Por defecto" ])
+        expect(xlsx.sheet("Productos").row(2)).to eql([1.0, "queque", "en molde de cupcake", 1500.0, "N/A", "N/A", "N/A", "N/A", "N/A", "queque-en-molde-de-cupcake", "Este es el mejor queque de Chile", "Sí", "2017-12-06", "", "Por defecto" ])
         #Properties
         expect(xlsx.sheet("Propiedades").row(2)).to eql([1.0, "Hecho en casa", "Sí"])
         expect(xlsx.sheet("Propiedades").row(3)).to eql([1.0, "For real no fake", "No"])
@@ -82,7 +82,7 @@ RSpec.describe TiendappProducts::Export do
         # We check that the excel holds the correct values
         xlsx = Roo::Spreadsheet.open('spec/fixtures/exported.xlsx')
         #Products
-        expect(xlsx.sheet("Productos").row(2)).to eql([1.0, "queque", "en molde de cupcake", 1500.0, 234566.0, 123.0, 132.0, 134.0, 234.0, "queque-en-molde-de-cupcake", "Este es el mejor queque de Chile", "Sí", "2017-12-06", "TODO", "Por defecto" ])
+        expect(xlsx.sheet("Productos").row(2)).to eql([1.0, "queque", "en molde de cupcake", 1500.0, 234566.0, 123.0, 132.0, 134.0, 234.0, "queque-en-molde-de-cupcake", "Este es el mejor queque de Chile", "Sí", "2017-12-06", "", "Por defecto" ])
       end
       it "should print No in visible" do
         # We create an object in the database
@@ -90,13 +90,6 @@ RSpec.describe TiendappProducts::Export do
         t = (Date.current + 3).strftime("%Y-%m-%d")
         sc = Spree::ShippingCategory.create!(name:"Por defecto")
         pr = Spree::Product.create!(name:"queque", price:"1500", description: "en molde de cupcake", slug: "queque-en-molde-de-cupcake", meta_description: "Este es el mejor queque de Chile", available_on: t,  shipping_category_id: sc.id)
-        var = Spree::Variant.where(product_id: pr.id).first
-        var.sku = "234566"
-        var.width = 134
-        var.height = 132
-        var.weight = 123
-        var.depth = 234
-        var.save!
 
         # We ask the gem to create the excel
         TiendappProducts::Export.get_products('spec/fixtures/exported.xlsx')
@@ -104,7 +97,27 @@ RSpec.describe TiendappProducts::Export do
         # We check that the excel holds the correct values
         xlsx = Roo::Spreadsheet.open('spec/fixtures/exported.xlsx')
         #Products
-        expect(xlsx.sheet("Productos").row(2)).to eql([1.0, "queque", "en molde de cupcake", 1500.0, 234566.0, 123.0, 132.0, 134.0, 234.0, "queque-en-molde-de-cupcake", "Este es el mejor queque de Chile", "No", t, "TODO", "Por defecto"])
+        expect(xlsx.sheet("Productos").row(2)[11]).to eql("No")
+      end
+      it "Should print the categories (taxons)" do
+        # We create an object in the database
+        #Product
+        sc = Spree::ShippingCategory.create!(name:"Por defecto")
+        pr = Spree::Product.create!(name:"queque", price:"1500", description: "en molde de cupcake", slug: "queque-en-molde-de-cupcake", meta_description: "Este es el mejor queque de Chile", available_on: "2017-12-06",  shipping_category_id: sc.id)
+        #Categories
+        ty = Spree::Taxonomy.create!(name: "riri")
+        t1 = Spree::Taxon.where(taxonomy_id: ty.id).first
+        t2 = Spree::Taxon.create(name:"ruru", parent_id: t1.id, taxonomy_id: ty.id)
+        t3 = Spree::Taxon.create(name:"rere", parent_id: t2.id, taxonomy_id: ty.id)
+        pr.taxons << t3
+
+        # We ask the gem to create the excel
+        TiendappProducts::Export.get_products('spec/fixtures/exported.xlsx')
+
+        # We check that the excel holds the correct values
+        xlsx = Roo::Spreadsheet.open('spec/fixtures/exported.xlsx')
+        #Products
+        expect(xlsx.sheet("Productos").row(2)[13]).to eql("riri->ruru->rere")
       end
   end
 end
