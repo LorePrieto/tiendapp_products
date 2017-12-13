@@ -9,7 +9,7 @@ module TiendappProducts
       end
       Axlsx::Package.new do |p|
         p.workbook.add_worksheet(:name => "Productos") do |sheet|
-          sheet.add_row ["ID", "Nombre", "Descripción", "Precio Principal", "SKU", "Peso", "Altura", "Longitud", "Profundidad", "Slug", "Descripción Meta", "Visible", "Disponible en", "Categorías", "Categoría de Shipping" ]
+          sheet.add_row ["ID", "Nombre", "Descripción", "Precio Principal", "SKU Producto", "Peso", "Altura", "Longitud", "Profundidad", "Slug", "Descripción Meta", "Visible", "Disponible en", "Categorías", "Categoría de Shipping" ]
           Spree::Product.all.each do |product|
             var = Spree::Variant.where(product_id: product.id).where(is_master: true).first
             taxons = product.taxons
@@ -50,7 +50,7 @@ module TiendappProducts
           end
         end
         p.workbook.add_worksheet(:name => "Variantes") do |sheet|
-          sheet.add_row ["ID", "ID Producto", "Opciones", "SKU", "Precio", "Peso", "Altura", "Longitud", "Profundidad"]
+          sheet.add_row ["ID", "ID Producto", "Opciones", "SKU Variante", "Precio", "Peso", "Altura", "Longitud", "Profundidad"]
           Spree::Product.all.each do |product|
             product.variants.each do |variant|
               values = variant.option_values
