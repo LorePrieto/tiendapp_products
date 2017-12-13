@@ -46,8 +46,8 @@ RSpec.describe TiendappProducts::Export do
         expect(xlsx.sheet("Propiedades").row(1)).to eql(["ID Producto", "Propiedad", "Valor"])
         expect(xlsx.sheet("Opciones").row(1)).to eql(["ID Producto", "Opción", "Valores" ])
         expect(xlsx.sheet("Variantes").row(1)).to eql(["ID", "ID Producto", "Opciones", "SKU", "Precio", "Peso", "Altura", "Longitud", "Profundidad"])
-        expect(xlsx.sheet("Ubicaciones").row(1)).to eql(["ID", "Nombre", "Nombre Interno", "Calle", "Ciudad", "Calle de referencia", "Código Postal", "Teléfono", "País", "Región", "Activa", "Por defecto", "Backorderable", "Propagar por todas las variantes"])
-        expect(xlsx.sheet("Stock").row(1)).to eql(["ID Producto", "ID Variante", "Cantidad", "ID Ubicación", "Backorderable"])
+        expect(xlsx.sheet("Ubicaciones").row(1)).to eql(["Nombre", "Nombre Interno", "Calle", "Ciudad", "Calle de referencia", "Código Postal", "Teléfono", "País", "Región", "Activa", "Por defecto", "Backorderable", "Propagar por todas las variantes"])
+        expect(xlsx.sheet("Stock").row(1)).to eql(["ID Producto", "Ubicación (Nom. Interno)", "ID Variante", "Cantidad", "Backorderable"])
         #Products
         expect(xlsx.sheet("Productos").row(2)).to eql([1.0, "queque", "en molde de cupcake", 1500.0, "N/A", "N/A", "N/A", "N/A", "N/A", "queque-en-molde-de-cupcake", "Este es el mejor queque de Chile", "Sí", "2017-12-06", "TODO", "Por defecto" ])
         #Properties
@@ -59,9 +59,9 @@ RSpec.describe TiendappProducts::Export do
         #Variants
         expect(xlsx.sheet("Variantes").row(2)).to eql([2.0, 1.0, "Nueces, estoy a dieta", 12345678.0, 2000.0, 200.0, 10.0, 10.0, 10.0])
         #Locations
-        expect(xlsx.sheet("Ubicaciones").row(2)).to eql([1.0, "Isla Diamante", "Central", "Playa 123", "Til Til", "Juan algo 234", 12345.0, 76543469.0, "Chile","Región Metropolitana", "Sí", "No", "Sí", "Sí"])
+        expect(xlsx.sheet("Ubicaciones").row(2)).to eql(["Isla Diamante", "Central", "Playa 123", "Til Til", "Juan algo 234", 12345.0, 76543469.0, "Chile","Región Metropolitana", "Sí", "No", "Sí", "Sí"])
         #Stock
-        expect(xlsx.sheet("Stock").row(2)).to eql([1.0, 2.0, 20.0, 1.0, "Sí"])
+        expect(xlsx.sheet("Stock").row(2)).to eql([1.0, "Central", 2.0, 20.0, "Sí"])
       end
       it "should only add SKU, weight, etc in products tab if there is no variants " do
         # We create an object in the database

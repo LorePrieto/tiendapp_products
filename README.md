@@ -1,8 +1,6 @@
 # TiendappProducts
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/tiendapp_products`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+This gem is created for importing and export product using Spree. Its functionailies where thought specifically for the TienApp's app.
 
 ## Installation
 
@@ -22,7 +20,17 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+For importing do
+```ruby
+TiendappProducts::Import.create_products([path_to_excel])
+```
+Note: the excel needs a specific format. (Look under 'spec/fixtures/imported.xlsx')
+For exporting do
+```ruby
+TiendappProducts::Export.get_products([path_to_save])
+```
+Note: the saved file needs to be a .xlsx, so the path has to be like 'spec/fixtures/exported.xlsx'.
+Note 2: no validation of correct data is done when importing.
 
 ## Development
 
