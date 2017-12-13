@@ -25,6 +25,7 @@ module TiendappProducts
           pr.properties << property
         end
         #Options
+        opt_dic = Hash.new([])
         ((xlsx.sheet("Opciones").first_row + 1)..xlsx.sheet("Opciones").last_row.to_i).each do |r|
           row = xlsx.sheet("Opciones").row(r)
           pr = Spree::Product.where(slug: prod_dic[row[0].to_i]).first
@@ -33,11 +34,47 @@ module TiendappProducts
           values = row[2].split(',')
           values.each do |v|
             opv1 = Spree::OptionValue.create!(name: v.strip, presentation: v.strip, option_type_id: ot.id)
+            opt_dic[row[0].to_i] << opv1
           end
         end
-        #variants
+        #Variants
+        var_dic = {}
+        ((xlsx.sheet("Variantes").first_row + 1)..xlsx.sheet("Variantes").last_row.to_i).each do |r|
+          row = xlsx.sheet("Variantes").row(r)
+          pr = Spree::Product.where(slug: prod_dic[row[1].to_i]).first
+          vr = Spree::Variant.create!(sku: row[3].to_i.to_s, weight: row[5].to_f, height: row[6].to_f, width: row[7].to_f, depth: row[8].to_f, is_master: false, product_id: pr.id)
+          vr.price = row[4].to_f
+          vr.save!
+          values = row[2].split(',')
+          op_vals = opt_dic[row[1].to_i]
+          values.each do |v|
+            op_vals.each do |opt|
+              if opt.name == v.strip
+                vr.option_values << opt
+                break
+              end
+            end
+          end
+          var_dic[row[0].to_i] = vr.id
+        end
         #Locations
+        ((xlsx.sheet("Ubicaciones").first_row + 1)..xlsx.sheet("Ubicaciones").last_row.to_i).each do |r|
+          row = xlsx.sheet("Ubicaciones").row(r)
+          country = Spree::Country.where(name: row[7].to_s).any? ? Spree::Country.where(name: row[7].to_s).first : Spree::Country.create!(name: row[7].to_s, iso_name: row[7].to_s.upcase, states_required: true)
+          sta = Spree::State.create!(name: row[8].to_s, country_id: country.id)
+          loc = Spree::StockLocation.create!(name: row[0].to_s, admin_name: row[1].to_s, address1: row[2].to_s, city: row[3].to_s, address2: row[4].to_s, zipcode: row[5].to_i.to_s, phone: row[6].to_i.to_s,
+             country_id: country.id, state_id: sta.id, active: row[9].to_s == "Sí", default: row[10].to_s == "Sí", backorderable_default: row[11].to_s == "Sí", propagate_all_variants: row[12].to_s == "Sí")
+        end
         #Stock
+        ((xlsx.sheet("Stock").first_row + 1)..xlsx.sheet("Stock").last_row.to_i).each do |r|
+          row = xlsx.sheet("Stock").row(r)
+          loc = Spree::StockLocation.where(admin_name: row[1].to_s).first
+          vr = Spree::Variant.find(var_dic[row[2].to_i])
+          item = Spree::StockItem.where(stock_location_id: loc.id, variant_id: vr.id).any? ? Spree::StockItem.where(stock_location_id: loc.id, variant_id: vr.id).first : Spree::StockItem.create!(stock_location_id: loc.id, variant_id: vr.id)
+          item.backorderable = (row[4].to_s == "Sí")
+          item.save
+          Spree::StockMovement.create!(stock_item_id: item.id, quantity: row[3].to_i)
+        end
       end
     end
 
@@ -77,10 +114,10 @@ module TiendappProducts
       if xlsx.sheet("Variantes").row(1) != ["ID", "ID Producto", "Opciones", "SKU", "Precio", "Peso", "Altura", "Longitud", "Profundidad"]
         return "Los headers en la hoja Variantes no son correctos"
       end
-      if xlsx.sheet("Ubicaciones").row(1) != ["ID", "Nombre", "Nombre Interno", "Calle", "Ciudad", "Calle de referencia", "Código Postal", "Teléfono", "País", "Región", "Activa", "Por defecto", "Backorderable", "Propagar por todas las variantes"]
+      if xlsx.sheet("Ubicaciones").row(1) != ["Nombre", "Nombre Interno", "Calle", "Ciudad", "Calle de referencia", "Código Postal", "Teléfono", "País", "Región", "Activa", "Por defecto", "Backorderable", "Propagar por todas las variantes"]
         return "Los headers en la hoja Ubicaciones no son correctos"
       end
-      if xlsx.sheet("Stock").row(1) != ["ID Producto", "ID Variante", "Cantidad", "ID Ubicación", "Backorderable"]
+      if xlsx.sheet("Stock").row(1) != ["ID Producto", "Ubicación (Nom. Interno)", "ID Variante", "Cantidad", "Backorderable"]
         return "Los headers en la hoja Stock no son correctos"
       end
       return false

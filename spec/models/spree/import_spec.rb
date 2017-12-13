@@ -32,8 +32,39 @@ RSpec.describe TiendappProducts::Import do
       expect(ot2.option_values.first.name).to eql("estoy a dieta")
       expect(ot2.option_values.second.name).to eql("gigante")
       #variants
+      var = product.variants.first
+      expect(var.sku).to eql("12345678")
+      expect(var.weight).to eql(200.0)
+      expect(var.height).to eql(10.0)
+      expect(var.width).to eql(10.0)
+      expect(var.depth).to eql(10.0)
+      expect(var.price).to eql(2000.0)
+      val1 = var.option_values.first
+      expect(val1.name).to eql("Nueces")
+      val2 = var.option_values.second
+      expect(val2.name).to eql("estoy a dieta")
       #Locations
+      loc = Spree::StockLocation.where(admin_name: "Central").first
+      expect(loc.name).to eql("Isla Diamante")
+      expect(loc.address1).to eql("Playa 123")
+      expect(loc.city).to eql("Til Til")
+      expect(loc.address2).to eql("Juan algo 234")
+      expect(loc.zipcode).to eql("12345")
+      expect(loc.phone).to eql("76543469")
+      expect(loc.country.name).to eql("Chile")
+      expect(loc.country.iso_name).to eql("CHILE")
+      expect(loc.state.name).to eql("Región Metropolitana")
+      expect(loc.state.country.name).to eql("Chile")
+      expect(loc.active).to eql(true)
+      expect(loc.default).to eql(false)
+      expect(loc.backorderable_default).to eql(true)
+      expect(loc.propagate_all_variants).to eql(true)
       #Stock
+      var = product.variants.first
+      item = var.stock_items.first
+      expect(item.stock_location_id).to eql(loc.id)
+      expect(item.backorderable).to eql(true)
+      expect(item.count_on_hand).to eql(20)
     end
   end
 end
