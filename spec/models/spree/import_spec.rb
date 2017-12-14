@@ -19,9 +19,13 @@ RSpec.describe TiendappProducts::Import do
       expect(product.shipping_category_id).to eql(sc.id)
       #Propiedades
       expect(product.properties.first.name).to eql("Hecho en casa")
-      expect(product.properties.first.presentation).to eql("Sí")
+      expect(product.properties.first.presentation).to eql("Hecho en casa")
       expect(product.properties.second.name).to eql("For real no fake")
-      expect(product.properties.second.presentation).to eql("No")
+      expect(product.properties.second.presentation).to eql("For real no fake")
+      pro_pro1 = product.properties.first.product_properties.first
+      expect(pro_pro1.value).to eql("Sí")
+      pro_pro2 = product.properties.second.product_properties.first
+      expect(pro_pro2.value).to eql("No")
       #Options
       ot1 = product.option_types.first
       expect(ot1.name).to eql("Sabor")

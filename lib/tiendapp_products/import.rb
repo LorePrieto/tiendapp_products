@@ -50,8 +50,8 @@ module TiendappProducts
         ((xlsx.sheet("Propiedades").first_row + 1)..xlsx.sheet("Propiedades").last_row.to_i).each do |r|
           row = xlsx.sheet("Propiedades").row(r)
           pr = Spree::Product.where(slug: prod_dic[row[0].to_i]).first
-          property = Spree::Property.create!(name: row[1].to_s, presentation: row[2].to_s)
-          pr.properties << property
+          property = Spree::Property.create!(name: row[1].to_s, presentation: row[1].to_s)
+          Spree::ProductProperty.create!(value: row[2].to_s, product_id: pr.id, property_id: property.id)
         end
         #Options
         opt_dic = Hash.new([])
