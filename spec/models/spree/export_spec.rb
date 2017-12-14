@@ -9,10 +9,10 @@ RSpec.describe TiendappProducts::Export do
         sc = Spree::ShippingCategory.create!(name:"Por defecto")
         pr = Spree::Product.create!(name:"queque", price:1500, description: "en molde de cupcake", slug: "queque-en-molde-de-cupcake", meta_description: "Este es el mejor queque de Chile", available_on: "2017-12-06",  shipping_category_id: sc.id)
         #Properties
-        p1 = Spree::Property.create!(name: "Hecho en casa", presentation: "Sí")
-        p2 = Spree::Property.create!(name: "For real no fake", presentation: "No")
-        pr.properties << p1
-        pr.properties << p2
+        p1 = Spree::Property.create!(name: "Hecho en casa", presentation: "Hecho en casa")
+        p2 = Spree::Property.create!(name: "For real no fake", presentation: "For real no fake")
+        Spree::ProductProperty.create!(value: "Sí", product_id: pr.id, property_id: p1.id)
+        Spree::ProductProperty.create!(value: "No", product_id: pr.id, property_id: p2.id)
         #Options
         opt1 = Spree::OptionType.create!(name: "Sabor", presentation: "Sabor", position: 1)
         opt2 = Spree::OptionType.create!(name: "Tamaño", presentation: "Tamaño", position: 2)

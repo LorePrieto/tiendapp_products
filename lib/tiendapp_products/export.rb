@@ -32,7 +32,9 @@ module TiendappProducts
           sheet.add_row ["ID Producto", "Propiedad", "Valor"]
           Spree::Product.all.each do |product|
             product.properties.each do |property|
-              sheet.add_row [product.id, property.name, property.presentation ]
+              property.product_properties.each do |pp|
+                sheet.add_row [product.id, property.name, pp.value ]
+              end
             end
           end
         end
