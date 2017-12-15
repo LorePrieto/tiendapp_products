@@ -10,6 +10,7 @@ RSpec.describe TiendappProducts::Import do
       #Check the database for the correct entries
       product = Spree::Product.where(slug: "queque-en-molde-de-cupcake").first
       sc = Spree::ShippingCategory.where(name: "Por defecto").first
+      var = Spree::Variant.where(product_id: product.id, is_master: true).first
       #Products
       expect(product.name).to eql("queque")
       expect(product.description).to eql("en molde de cupcake")
@@ -17,6 +18,12 @@ RSpec.describe TiendappProducts::Import do
       expect(product.meta_description).to eql("Este es el mejor queque de Chile")
       expect(product.available_on.strftime("%Y-%m-%d")).to eql(DateTime.parse("2017-12-06 17:26:02 UTC").strftime("%Y-%m-%d"))
       expect(product.shipping_category_id).to eql(sc.id)
+      expect(var.sku).to eql("87654321")
+      expect(var.weight).to eql(200.0)
+      expect(var.height).to eql(10.0)
+      expect(var.width).to eql(10.0)
+      expect(var.depth).to eql(10.0)
+      expect(var.price).to eql(1500.0)
       #Propiedades
       expect(product.properties.first.name).to eql("Hecho en casa")
       expect(product.properties.first.presentation).to eql("Hecho en casa")
@@ -104,6 +111,107 @@ RSpec.describe TiendappProducts::Import do
       ty = Spree::Taxonomy.find(t1.taxonomy_id)
       expect(t1.name).to eql("coco")
       expect(ty.name).to eql("coco")
+    end
+    it "should still work if only the require data is in the excel" do
+      #We load the excel
+      TiendappProducts::Import.create_products('spec/fixtures/imported2.xlsx')
+
+      # Product
+      product = Spree::Product.where(slug: "queque").first
+      sc = Spree::ShippingCategory.where(name: "Por defecto").first
+      expect(product.name).to eql("queque")
+      expect(product.description).to eql(nil)
+      expect(product.price).to eql(1500)
+      expect(product.meta_description).to eql(nil)
+      expect(product.available_on).to eql(nil)
+      expect(product.shipping_category_id).to eql(sc.id)
+      expect(product.available?).to eql(false)
+      #should only add SKU, weight, height, width and depth if there are not N/A or empty
+      pr = Spree::Product.where(slug: "queque").first
+      vr = Spree::Variant.where(product_id: pr.id, is_master: true).first
+      expect(vr.sku).to eql("")
+      expect(vr.weight).to eql(0.0)
+      expect(vr.height).to eql(nil)
+      expect(vr.width).to eql(nil)
+      expect(vr.depth).to eql(nil)
+      #should not have categories (taxons)
+      expect(product.taxons.count).to eql(0)
+
+      #Variants
+      var = product.variants.first
+      expect(var.sku).to eql("")
+      expect(var.weight).to eql(0.0)
+      expect(var.height).to eql(nil)
+      expect(var.width).to eql(nil)
+      expect(var.depth).to eql(nil)
+      expect(var.price).to eql(2000.0)
+      val1 = var.option_values.first
+      expect(val1.name).to eql("Nueces")
+      val2 = var.option_values.second
+      expect(val2.name).to eql("estoy a dieta")
+
+      #Locations
+      loc = Spree::StockLocation.where(admin_name: "Central").first
+      expect(loc.name).to eql("Isla Diamante")
+      expect(loc.address1).to eql("Playa 123")
+      expect(loc.city).to eql("Til Til")
+      expect(loc.address2).to eql("")
+      expect(loc.zipcode).to eql("12345")
+      expect(loc.phone).to eql("")
+      expect(loc.country.name).to eql("Chile")
+      expect(loc.country.iso_name).to eql("CHILE")
+      expect(loc.state.name).to eql("Región Metropolitana")
+      expect(loc.state.country.name).to eql("Chile")
+      expect(loc.active).to eql(true)
+      expect(loc.default).to eql(false)
+      expect(loc.backorderable_default).to eql(false)
+      expect(loc.propagate_all_variants).to eql(true)
+
+      #Stock
+      var = product.variants.first
+      item = var.stock_items.first
+      expect(item.stock_location_id).to eql(Spree::StockLocation.first.id)
+      expect(item.backorderable).to eql(false)
+      expect(item.count_on_hand).to eql(20)
+
+    end
+    it "should not add existing entries to database" do
+      ## hacer dos veces el comando y ver que haya la cantidad que debe haber (1 producto, 2 variantes. etc)
+      #We load the same excel twice
+      TiendappProducts::Import.create_products('spec/fixtures/imported.xlsx')
+      TiendappProducts::Import.create_products('spec/fixtures/imported.xlsx')
+
+      expect(Spree::Product.count).to eql(1)
+      pr = Spree::Product.first
+      expect(pr.taxons.count).to eql(2)
+      expect(Spree::Taxonomy.all.count).to eql(2)
+      expect(Spree::Taxon.all.count).to eql(4)
+      expect(pr.properties.count).to eql(2)
+      expect(pr.properties.first.product_properties.count).to eql(1)
+      expect(Spree::Property.count).to eql(2)
+      expect(Spree::ProductProperty.count).to eql(2)
+      expect(Spree::OptionType.count).to eql(2)
+      expect(Spree::ProductOptionType.count).to eql(2)
+      expect(Spree::OptionValue.count).to eql(4)
+      expect(pr.option_types.count).to eql(2)
+      expect(pr.option_types.first.option_values.count).to eql(2)
+      expect(pr.option_types.second.option_values.count).to eql(2)
+      expect(pr.variants.count).to eql(1)
+      expect(Spree::Variant.all.count).to eql(2)
+      expect(Spree::Country.count).to eql(1)
+      expect(Spree::State.count).to eql(1)
+      expect(Spree::StockLocation.count).to eql(1)
+      expect(Spree::StockItem.count).to eql(2)
+      expect(Spree::StockMovement.count).to eql(1)
+    end
+    it "should have the last stock cantity in count_on_hand" do
+      ## hacer dos veces el comando y ver que haya la cantidad que debe haber (1 producto, 2 variantes. etc)
+      #We load the same excel twice
+      TiendappProducts::Import.create_products('spec/fixtures/imported.xlsx')
+      TiendappProducts::Import.create_products('spec/fixtures/imported3.xlsx') #Diferent stock value
+
+      product = Spree::Product.where(slug: "queque-en-molde-de-cupcake").first
+      expect(product.stock_items.second.count_on_hand).to eql(10)
     end
   end
 end
