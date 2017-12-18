@@ -4,7 +4,7 @@ module TiendappProducts
 
     def self.get_products(path)
       if path.split('.').last != "xlsx"
-        abort("Error: the file extension need to be xlsx")
+        abort("\e[41mError: la extension necesita ser xlsx\e[0m")
         return
       end
       Axlsx::Package.new do |p|

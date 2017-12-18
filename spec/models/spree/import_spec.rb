@@ -213,5 +213,8 @@ RSpec.describe TiendappProducts::Import do
       product = Spree::Product.where(slug: "queque-en-molde-de-cupcake").first
       expect(product.stock_items.second.count_on_hand).to eql(10)
     end
+    # it "should fail if the file to import is not a xlsx"do
+    #   expect(TiendappProducts::Import.create_products('spec/fixtures/imported.xls')).to raise_error(NameError)
+    # end
   end
 end

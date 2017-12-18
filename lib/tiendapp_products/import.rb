@@ -3,6 +3,10 @@ module TiendappProducts
     require 'roo'
 
     def self.create_products(path)
+      if path.split('.').last != "xlsx"
+        abort("\e[41mError: la extension necesita ser xlsx\e[0m")
+        return
+      end
       xlsx = Roo::Spreadsheet.open(path)
       if !self.is_not_a_correct_excel(xlsx)
         # Products
@@ -82,6 +86,7 @@ module TiendappProducts
       prod_dic = {}
       ((xlsx.sheet("Productos").first_row + 1)..xlsx.sheet("Productos").last_row.to_i).each do |r|
         row = xlsx.sheet("Productos").row(r)
+        self.product_check_require(row, r)
         sc = Spree::ShippingCategory.where(name: row[14].to_s).any? ? Spree::ShippingCategory.where(name: row[14].to_s).first : Spree::ShippingCategory.create!(name: row[14].to_s)
         if row[9].to_s == ""
           pr = Spree::Product.where(slug: row[1].to_s.downcase .gsub(" ", "-")).any? ? Spree::Product.where(slug: row[1].to_s.downcase .gsub(" ", "-")).first : Spree::Product.create!(name: row[1].to_s, price: row[3].to_i, shipping_category_id: sc.id, slug: row[1].to_s.downcase .gsub(" ", "-"))
@@ -133,12 +138,35 @@ module TiendappProducts
       return prod_dic
     end
 
+    def self.product_check_require(row, r)
+      if row[0] == nil
+        abort("\e[41mError de formato: en la hoja Producto en la fila "+r.to_s+" el ID no debe ser vació\e[0m")
+      elsif row[1] == nil
+        abort("\e[41mError de formato: en la hoja Producto en la fila "+r.to_s+" el Nombre no debe ser vació\e[0m")
+      elsif row[3] == nil
+        abort("\e[41mError de formato: en la hoja Producto en la fila "+r.to_s+" el Precio Principal no debe ser vació\e[0m")
+      elsif row[14] == nil
+        abort("\e[41mError de formato: en la hoja Producto en la fila "+r.to_s+" la Categoría de Shipping no debe ser vació\e[0m")
+      end
+    end
+
     def self.properties(xlsx, prod_dic)
       ((xlsx.sheet("Propiedades").first_row + 1)..xlsx.sheet("Propiedades").last_row.to_i).each do |r|
         row = xlsx.sheet("Propiedades").row(r)
+        self.property_check_require(row, r)
         pr = Spree::Product.where(slug: prod_dic[row[0].to_i]).first
         property = Spree::Property.where(name: row[1].to_s, presentation: row[1].to_s).any? ? Spree::Property.where(name: row[1].to_s, presentation: row[1].to_s).first : Spree::Property.create!(name: row[1].to_s, presentation: row[1].to_s)
         Spree::ProductProperty.where(value: row[2].to_s, product_id: pr.id, property_id: property.id).any? ? Spree::ProductProperty.where(value: row[2].to_s, product_id: pr.id, property_id: property.id).first : Spree::ProductProperty.create!(value: row[2].to_s, product_id: pr.id, property_id: property.id)
+      end
+    end
+
+    def self.property_check_require(row, r)
+      if row[0] == nil
+        abort("\e[41mError de formato: en la hoja Producto en la fila "+r.to_s+" el ID Producto no debe ser vació\e[0m")
+      elsif row[1] == nil
+        abort("\e[41mError de formato: en la hoja Producto en la fila "+r.to_s+" la Propiedad no debe ser vació\e[0m")
+      elsif row[2] == nil
+        abort("\e[41mError de formato: en la hoja Producto en la fila "+r.to_s+" el Valor no debe ser vació\e[0m")
       end
     end
 
