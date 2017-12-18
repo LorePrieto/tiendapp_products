@@ -18,49 +18,62 @@ module TiendappProducts
         #Stock
         self.stock(xlsx, var_dic)
       end
+      exit(true)
     end
 
     def self.is_not_a_correct_excel(xlsx)
       #Has the correct tabs and number of them
       if xlsx.sheets.count != 6
-        return "\e[41mError de formato: Deben ser 6 hojas en el excel\e[0m"
+        abort("\e[41mError de formato: Deben ser 6 hojas en el excel\e[0m")
       end
       if !(xlsx.sheets.include? "Productos")
-        return "\e[41mError de formato: No hay una hoja de Productos\e[0m"
+        abort("\e[41mError de formato: No hay una hoja de Productos\e[0m")
+        return true
       end
       if !(xlsx.sheets.include? "Propiedades")
-        return "\e[41mError de formato: No hay una hoja de Propiedades\e[0m"
+        abort("\e[41mError de formato: No hay una hoja de Propiedades\e[0m")
+        return true
       end
       if !(xlsx.sheets.include? "Opciones")
-        return "\e[41mError de formato: No hay una hoja de Opciones\e[0m"
+        abort("\e[41mError de formato: No hay una hoja de Opciones\e[0m")
+        return true
       end
       if !(xlsx.sheets.include? "Variantes")
-        return "\e[41mError de formato: No hay una hoja de Variantes\e[0m"
+        abort("\e[41mError de formato: No hay una hoja de Variantes\e[0m")
+        return true
       end
       if !(xlsx.sheets.include? "Ubicaciones")
-        return "\e[41mError de formato: No hay una hoja de Ubicaciones\e[0m"
+        abort("\e[41mError de formato: No hay una hoja de Ubicaciones\e[0m")
+        return true
       end
       if !(xlsx.sheets.include? "Stock")
-        return "\e[41mError de formato: No hay una hoja de Stock\e[0m"
+        abort("\e[41mError de formato: No hay una hoja de Stock\e[0m")
+        return true
       end
       #Has the correct headers in the tabs
       if xlsx.sheet("Productos").row(1) != ["ID*", "Nombre*", "Descripción", "Precio Principal*", "SKU Producto", "Peso", "Altura", "Longitud", "Profundidad", "Slug", "Descripción Meta", "Visible", "Disponible en", "Categorías",  "Categoría de Shipping*"]
-        return "\e[41mError de formato: Los encabezados en la hoja Productos no son correctos\e[0m"
+        abort("\e[41mError de formato: Los encabezados en la hoja Productos no son correctos\e[0m")
+        return true
       end
       if xlsx.sheet("Propiedades").row(1) != ["ID Producto*", "Propiedad*", "Valor*"]
-        return "\e[41mError de formato: Los encabezados en la hoja Propiedades no son correctos\e[0m"
+        abort("\e[41mError de formato: Los encabezados en la hoja Propiedades no son correctos\e[0m")
+        return true
       end
       if xlsx.sheet("Opciones").row(1) != ["ID Producto*", "Opción*", "Valores*" ]
-        return "\e[41mError de formato: Los encabezados en la hoja Opciones no son correctos\e[0m"
+        abort("\e[41mError de formato: Los encabezados en la hoja Opciones no son correctos\e[0m")
+        return true
       end
       if xlsx.sheet("Variantes").row(1) != ["ID*", "ID Producto*", "Opciones*", "SKU Variante", "Precio*", "Peso", "Altura", "Longitud", "Profundidad"]
-        return "\e[41mError de formato: Los encabezados en la hoja Variantes no son correctos\e[0m"
+        abort("\e[41mError de formato: Los encabezados en la hoja Variantes no son correctos\e[0m")
+        return true
       end
       if xlsx.sheet("Ubicaciones").row(1) != ["Nombre*", "Nombre Interno*", "Calle*", "Ciudad*", "Calle de referencia", "Código Postal*", "Teléfono", "País*", "Región*", "Activa", "Por defecto", "Backorderable", "Propagar por todas las variantes"]
-        return "\e[41mError de formato: Los encabezados en la hoja Ubicaciones no son correctos\e[0m"
+        abort("\e[41mError de formato: Los encabezados en la hoja Ubicaciones no son correctos\e[0m")
+        return true
       end
       if xlsx.sheet("Stock").row(1) != ["ID Producto*", "Ubicación (Nom. Interno)", "ID Variante*", "Cantidad*", "Backorderable"]
-        return "\e[41mError de formato: Los encabezados en la hoja Stock no son correctos\e[0m"
+        abort("\e[41mError de formato: Los encabezados en la hoja Stock no son correctos\e[0m")
+        return true
       end
       return false
     end
