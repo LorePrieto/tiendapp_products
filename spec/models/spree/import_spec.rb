@@ -176,12 +176,11 @@ RSpec.describe TiendappProducts::Import do
 
     end
     it "should not add existing entries to database" do
-      ## hacer dos veces el comando y ver que haya la cantidad que debe haber (1 producto, 2 variantes. etc)
       #We load the same excel twice
       TiendappProducts::Import.create_products('spec/fixtures/imported.xlsx')
       TiendappProducts::Import.create_products('spec/fixtures/imported.xlsx')
 
-      expect(Spree::Product.count).to eql(1)
+      expect(Spree::Product.count).to eql(2)
       pr = Spree::Product.first
       expect(pr.taxons.count).to eql(2)
       expect(Spree::Taxonomy.all.count).to eql(2)
@@ -197,15 +196,14 @@ RSpec.describe TiendappProducts::Import do
       expect(pr.option_types.first.option_values.count).to eql(2)
       expect(pr.option_types.second.option_values.count).to eql(2)
       expect(pr.variants.count).to eql(1)
-      expect(Spree::Variant.all.count).to eql(2)
+      expect(Spree::Variant.all.count).to eql(3)
       expect(Spree::Country.count).to eql(1)
       expect(Spree::State.count).to eql(1)
       expect(Spree::StockLocation.count).to eql(1)
-      expect(Spree::StockItem.count).to eql(2)
+      expect(Spree::StockItem.count).to eql(3)
       expect(Spree::StockMovement.count).to eql(1)
     end
     it "should have the last stock cantity in count_on_hand" do
-      ## hacer dos veces el comando y ver que haya la cantidad que debe haber (1 producto, 2 variantes. etc)
       #We load the same excel twice
       TiendappProducts::Import.create_products('spec/fixtures/imported.xlsx')
       TiendappProducts::Import.create_products('spec/fixtures/imported3.xlsx') #Diferent stock value
@@ -213,8 +211,33 @@ RSpec.describe TiendappProducts::Import do
       product = Spree::Product.where(slug: "queque-en-molde-de-cupcake").first
       expect(product.stock_items.second.count_on_hand).to eql(10)
     end
-    # it "should fail if the file to import is not a xlsx"do
-    #   expect(TiendappProducts::Import.create_products('spec/fixtures/imported.xls')).to raise_error(NameError)
-    # end
+    it "should return error if a require is missing in Products" do
+      m = TiendappProducts::Import.create_products('spec/fixtures/imported4.xlsx')
+      expect(m).to eql("Error de formato: en la hoja Productos fila 2 el Nombre no puede ser vacio")
+    end
+    it "should return error if a require is missing in Propiedades" do
+      m = TiendappProducts::Import.create_products('spec/fixtures/imported5.xlsx')
+      expect(m).to eql("Error de formato: en la hoja Productos fila 2 la Propiedad no puede ser vacio")
+    end
+    it "should return error if a require is missing in Opciones" do
+      m = TiendappProducts::Import.create_products('spec/fixtures/imported6.xlsx')
+      expect(m).to eql("Error de formato: en la hoja Productos fila 2 los Valores no puede ser vacio")
+    end
+    it "should return error if a require is missing in Variantes" do
+      m = TiendappProducts::Import.create_products('spec/fixtures/imported7.xlsx')
+      expect(m).to eql("Error de formato: en la hoja Variantes fila 2 el Precio no puede ser vacio")
+    end
+    it "should return error if a require is missing in Ubicaciones" do
+      m = TiendappProducts::Import.create_products('spec/fixtures/imported8.xlsx')
+      expect(m).to eql("Error de formato: en la hoja Ubicaciones fila 2 la Calle no puede ser vacio")
+    end
+    it "should return error if a require is missing in Stock" do
+      m = TiendappProducts::Import.create_products('spec/fixtures/imported9.xlsx')
+      expect(m).to eql("Error de formato: en la hoja Variantes fila 2 el ID Variante no puede ser vacio")
+    end
+    it "should fail if the file to import is not a xlsx" do
+      m = TiendappProducts::Import.create_products('spec/fixtures/imported.xls')
+      expect(m).to eql("Error: la extensión del archivo debe ser xlsx")
+    end
   end
 end

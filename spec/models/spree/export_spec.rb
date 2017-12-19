@@ -119,5 +119,9 @@ RSpec.describe TiendappProducts::Export do
         #Products
         expect(xlsx.sheet("Productos").row(2)[13]).to eql("riri->ruru->rere")
       end
+      it "should fail if the file to import is not a xlsx" do
+        m = TiendappProducts::Export.get_products('spec/fixtures/exported.xls')
+        expect(m).to eql("Error: la extensión del archivo debe ser xlsx")
+      end
   end
 end

@@ -4,7 +4,7 @@ module TiendappProducts
 
     def self.get_products(path)
       if path.split('.').last != "xlsx"
-        return "Error: the file extension need to be xlsx"
+        return "Error: la extensión del archivo debe ser xlsx"
       end
       Axlsx::Package.new do |p|
         p.workbook.add_worksheet(:name => "Productos") do |sheet|
