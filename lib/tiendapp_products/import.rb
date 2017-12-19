@@ -3,10 +3,6 @@ module TiendappProducts
     require 'roo'
 
     def self.create_products(path)
-      if path.split('.').last != "xlsx"
-        abort("\e[41mError: la extension necesita ser xlsx\e[0m")
-        return
-      end
       xlsx = Roo::Spreadsheet.open(path)
       if !self.is_not_a_correct_excel(xlsx)
         # Products
@@ -22,62 +18,49 @@ module TiendappProducts
         #Stock
         self.stock(xlsx, var_dic)
       end
-      exit(true)
     end
 
     def self.is_not_a_correct_excel(xlsx)
       #Has the correct tabs and number of them
       if xlsx.sheets.count != 6
-        abort("\e[41mError de formato: Deben ser 6 hojas en el excel\e[0m")
+        return "\e[41mError de formato: Deben ser 6 hojas en el excel\e[0m"
       end
       if !(xlsx.sheets.include? "Productos")
-        abort("\e[41mError de formato: No hay una hoja de Productos\e[0m")
-        return true
+        return "\e[41mError de formato: No hay una hoja de Productos\e[0m"
       end
       if !(xlsx.sheets.include? "Propiedades")
-        abort("\e[41mError de formato: No hay una hoja de Propiedades\e[0m")
-        return true
+        return "\e[41mError de formato: No hay una hoja de Propiedades\e[0m"
       end
       if !(xlsx.sheets.include? "Opciones")
-        abort("\e[41mError de formato: No hay una hoja de Opciones\e[0m")
-        return true
+        return "\e[41mError de formato: No hay una hoja de Opciones\e[0m"
       end
       if !(xlsx.sheets.include? "Variantes")
-        abort("\e[41mError de formato: No hay una hoja de Variantes\e[0m")
-        return true
+        return "\e[41mError de formato: No hay una hoja de Variantes\e[0m"
       end
       if !(xlsx.sheets.include? "Ubicaciones")
-        abort("\e[41mError de formato: No hay una hoja de Ubicaciones\e[0m")
-        return true
+        return "\e[41mError de formato: No hay una hoja de Ubicaciones\e[0m"
       end
       if !(xlsx.sheets.include? "Stock")
-        abort("\e[41mError de formato: No hay una hoja de Stock\e[0m")
-        return true
+        return "\e[41mError de formato: No hay una hoja de Stock\e[0m"
       end
       #Has the correct headers in the tabs
       if xlsx.sheet("Productos").row(1) != ["ID*", "Nombre*", "Descripción", "Precio Principal*", "SKU Producto", "Peso", "Altura", "Longitud", "Profundidad", "Slug", "Descripción Meta", "Visible", "Disponible en", "Categorías",  "Categoría de Shipping*"]
-        abort("\e[41mError de formato: Los encabezados en la hoja Productos no son correctos\e[0m")
-        return true
+        return "\e[41mError de formato: Los encabezados en la hoja Productos no son correctos\e[0m"
       end
       if xlsx.sheet("Propiedades").row(1) != ["ID Producto*", "Propiedad*", "Valor*"]
-        abort("\e[41mError de formato: Los encabezados en la hoja Propiedades no son correctos\e[0m")
-        return true
+        return "\e[41mError de formato: Los encabezados en la hoja Propiedades no son correctos\e[0m"
       end
       if xlsx.sheet("Opciones").row(1) != ["ID Producto*", "Opción*", "Valores*" ]
-        abort("\e[41mError de formato: Los encabezados en la hoja Opciones no son correctos\e[0m")
-        return true
+        return "\e[41mError de formato: Los encabezados en la hoja Opciones no son correctos\e[0m"
       end
       if xlsx.sheet("Variantes").row(1) != ["ID*", "ID Producto*", "Opciones*", "SKU Variante", "Precio*", "Peso", "Altura", "Longitud", "Profundidad"]
-        abort("\e[41mError de formato: Los encabezados en la hoja Variantes no son correctos\e[0m")
-        return true
+        return "\e[41mError de formato: Los encabezados en la hoja Variantes no son correctos\e[0m"
       end
       if xlsx.sheet("Ubicaciones").row(1) != ["Nombre*", "Nombre Interno*", "Calle*", "Ciudad*", "Calle de referencia", "Código Postal*", "Teléfono", "País*", "Región*", "Activa", "Por defecto", "Backorderable", "Propagar por todas las variantes"]
-        abort("\e[41mError de formato: Los encabezados en la hoja Ubicaciones no son correctos\e[0m")
-        return true
+        return "\e[41mError de formato: Los encabezados en la hoja Ubicaciones no son correctos\e[0m"
       end
       if xlsx.sheet("Stock").row(1) != ["ID Producto*", "Ubicación (Nom. Interno)", "ID Variante*", "Cantidad*", "Backorderable"]
-        abort("\e[41mError de formato: Los encabezados en la hoja Stock no son correctos\e[0m")
-        return true
+        return "\e[41mError de formato: Los encabezados en la hoja Stock no son correctos\e[0m"
       end
       return false
     end
@@ -86,7 +69,6 @@ module TiendappProducts
       prod_dic = {}
       ((xlsx.sheet("Productos").first_row + 1)..xlsx.sheet("Productos").last_row.to_i).each do |r|
         row = xlsx.sheet("Productos").row(r)
-        self.product_check_require(row, r)
         sc = Spree::ShippingCategory.where(name: row[14].to_s).any? ? Spree::ShippingCategory.where(name: row[14].to_s).first : Spree::ShippingCategory.create!(name: row[14].to_s)
         if row[9].to_s == ""
           pr = Spree::Product.where(slug: row[1].to_s.downcase .gsub(" ", "-")).any? ? Spree::Product.where(slug: row[1].to_s.downcase .gsub(" ", "-")).first : Spree::Product.create!(name: row[1].to_s, price: row[3].to_i, shipping_category_id: sc.id, slug: row[1].to_s.downcase .gsub(" ", "-"))
@@ -138,35 +120,12 @@ module TiendappProducts
       return prod_dic
     end
 
-    def self.product_check_require(row, r)
-      if row[0] == nil
-        abort("\e[41mError de formato: en la hoja Producto en la fila "+r.to_s+" el ID no debe ser vació\e[0m")
-      elsif row[1] == nil
-        abort("\e[41mError de formato: en la hoja Producto en la fila "+r.to_s+" el Nombre no debe ser vació\e[0m")
-      elsif row[3] == nil
-        abort("\e[41mError de formato: en la hoja Producto en la fila "+r.to_s+" el Precio Principal no debe ser vació\e[0m")
-      elsif row[14] == nil
-        abort("\e[41mError de formato: en la hoja Producto en la fila "+r.to_s+" la Categoría de Shipping no debe ser vació\e[0m")
-      end
-    end
-
     def self.properties(xlsx, prod_dic)
       ((xlsx.sheet("Propiedades").first_row + 1)..xlsx.sheet("Propiedades").last_row.to_i).each do |r|
         row = xlsx.sheet("Propiedades").row(r)
-        self.property_check_require(row, r)
         pr = Spree::Product.where(slug: prod_dic[row[0].to_i]).first
         property = Spree::Property.where(name: row[1].to_s, presentation: row[1].to_s).any? ? Spree::Property.where(name: row[1].to_s, presentation: row[1].to_s).first : Spree::Property.create!(name: row[1].to_s, presentation: row[1].to_s)
         Spree::ProductProperty.where(value: row[2].to_s, product_id: pr.id, property_id: property.id).any? ? Spree::ProductProperty.where(value: row[2].to_s, product_id: pr.id, property_id: property.id).first : Spree::ProductProperty.create!(value: row[2].to_s, product_id: pr.id, property_id: property.id)
-      end
-    end
-
-    def self.property_check_require(row, r)
-      if row[0] == nil
-        abort("\e[41mError de formato: en la hoja Producto en la fila "+r.to_s+" el ID Producto no debe ser vació\e[0m")
-      elsif row[1] == nil
-        abort("\e[41mError de formato: en la hoja Producto en la fila "+r.to_s+" la Propiedad no debe ser vació\e[0m")
-      elsif row[2] == nil
-        abort("\e[41mError de formato: en la hoja Producto en la fila "+r.to_s+" el Valor no debe ser vació\e[0m")
       end
     end
 
