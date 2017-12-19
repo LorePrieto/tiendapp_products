@@ -4,7 +4,8 @@ module TiendappProducts
 
     def self.create_products(path)
       xlsx = Roo::Spreadsheet.open(path)
-      if !self.is_not_a_correct_excel(xlsx)
+      message = self.is_not_a_correct_excel(xlsx)
+      if !message
         # Products
         prod_dic = self.products(xlsx)
         #Properties
@@ -17,7 +18,9 @@ module TiendappProducts
         self.locations(xlsx)
         #Stock
         self.stock(xlsx, var_dic)
+        return true
       end
+      return message
     end
 
     def self.is_not_a_correct_excel(xlsx)
