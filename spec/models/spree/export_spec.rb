@@ -42,12 +42,12 @@ RSpec.describe TiendappProducts::Export do
         #Headers
         xlsx = Roo::Spreadsheet.open('spec/fixtures/exported.xlsx')
         expect(xlsx.sheets).to eql(["Productos", "Propiedades", "Opciones", "Variantes", "Ubicaciones", "Stock"])
-        expect(xlsx.sheet("Productos").row(1)).to eql(["ID", "Nombre", "Descripción", "Precio Principal", "SKU Producto", "Peso", "Altura", "Longitud", "Profundidad", "Slug", "Descripción Meta", "Visible", "Disponible en", "Categorías",  "Categoría de Shipping" ])
-        expect(xlsx.sheet("Propiedades").row(1)).to eql(["ID Producto", "Propiedad", "Valor"])
-        expect(xlsx.sheet("Opciones").row(1)).to eql(["ID Producto", "Opción", "Valores" ])
-        expect(xlsx.sheet("Variantes").row(1)).to eql(["ID", "ID Producto", "Opciones", "SKU Variante", "Precio", "Peso", "Altura", "Longitud", "Profundidad"])
-        expect(xlsx.sheet("Ubicaciones").row(1)).to eql(["Nombre", "Nombre Interno", "Calle", "Ciudad", "Calle de referencia", "Código Postal", "Teléfono", "País", "Región", "Activa", "Por defecto", "Backorderable", "Propagar por todas las variantes"])
-        expect(xlsx.sheet("Stock").row(1)).to eql(["ID Producto", "Ubicación (Nom. Interno)", "ID Variante", "Cantidad", "Backorderable"])
+        expect(xlsx.sheet("Productos").row(1)).to eql(["ID*", "Nombre*", "Descripción", "Precio Principal*", "SKU Producto", "Peso", "Altura", "Longitud", "Profundidad", "Slug", "Descripción Meta", "Visible", "Disponible en", "Categorías",  "Categoría de Shipping*" ])
+        expect(xlsx.sheet("Propiedades").row(1)).to eql(["ID Producto*", "Propiedad*", "Valor*"])
+        expect(xlsx.sheet("Opciones").row(1)).to eql(["ID Producto*", "Opción*", "Valores*" ])
+        expect(xlsx.sheet("Variantes").row(1)).to eql(["ID*", "ID Producto*", "Opciones*", "SKU Variante", "Precio*", "Peso", "Altura", "Longitud", "Profundidad"])
+        expect(xlsx.sheet("Ubicaciones").row(1)).to eql(["Nombre*", "Nombre Interno*", "Calle*", "Ciudad*", "Calle de referencia", "Código Postal*", "Teléfono", "País*", "Región*", "Activa", "Por defecto", "Backorderable", "Propagar por todas las variantes"])
+        expect(xlsx.sheet("Stock").row(1)).to eql(["ID Producto*", "Ubicación (Nom. Interno)", "ID Variante*", "Cantidad*", "Backorderable"])
         #Products
         expect(xlsx.sheet("Productos").row(2)).to eql([1, "queque", "en molde de cupcake", 1500.0, "N/A", "N/A", "N/A", "N/A", "N/A", "queque-en-molde-de-cupcake", "Este es el mejor queque de Chile", "Sí", "2017-12-06", "", "Por defecto" ])
         #Properties

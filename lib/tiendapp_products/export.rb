@@ -8,7 +8,7 @@ module TiendappProducts
       end
       Axlsx::Package.new do |p|
         p.workbook.add_worksheet(:name => "Productos") do |sheet|
-          sheet.add_row ["ID", "Nombre", "Descripción", "Precio Principal", "SKU Producto", "Peso", "Altura", "Longitud", "Profundidad", "Slug", "Descripción Meta", "Visible", "Disponible en", "Categorías", "Categoría de Shipping" ]
+          sheet.add_row ["ID*", "Nombre*", "Descripción", "Precio Principal*", "SKU Producto", "Peso", "Altura", "Longitud", "Profundidad", "Slug", "Descripción Meta", "Visible", "Disponible en", "Categorías", "Categoría de Shipping*" ]
           Spree::Product.all.each do |product|
             var = Spree::Variant.where(product_id: product.id).where(is_master: true).first
             taxons = product.taxons
@@ -28,7 +28,7 @@ module TiendappProducts
           end
         end
         p.workbook.add_worksheet(:name => "Propiedades") do |sheet|
-          sheet.add_row ["ID Producto", "Propiedad", "Valor"]
+          sheet.add_row ["ID Producto*", "Propiedad*", "Valor*"]
           Spree::Product.all.each do |product|
             product.properties.each do |property|
               property.product_properties.each do |pp|
@@ -38,7 +38,7 @@ module TiendappProducts
           end
         end
         p.workbook.add_worksheet(:name => "Opciones") do |sheet|
-          sheet.add_row ["ID Producto", "Opción", "Valores" ]
+          sheet.add_row ["ID Producto*", "Opción*", "Valores*" ]
           Spree::Product.all.each do |product|
             product.option_types.each do |opt|
               values = opt.option_values
@@ -51,7 +51,7 @@ module TiendappProducts
           end
         end
         p.workbook.add_worksheet(:name => "Variantes") do |sheet|
-          sheet.add_row ["ID", "ID Producto", "Opciones", "SKU Variante", "Precio", "Peso", "Altura", "Longitud", "Profundidad"]
+          sheet.add_row ["ID*", "ID Producto*", "Opciones*", "SKU Variante", "Precio*", "Peso", "Altura", "Longitud", "Profundidad"]
           Spree::Product.all.each do |product|
             product.variants.each do |variant|
               values = variant.option_values
@@ -64,13 +64,13 @@ module TiendappProducts
           end
         end
         p.workbook.add_worksheet(:name => "Ubicaciones") do |sheet|
-          sheet.add_row ["Nombre", "Nombre Interno", "Calle", "Ciudad", "Calle de referencia", "Código Postal", "Teléfono", "País", "Región", "Activa", "Por defecto", "Backorderable", "Propagar por todas las variantes"]
+          sheet.add_row ["Nombre*", "Nombre Interno*", "Calle*", "Ciudad*", "Calle de referencia", "Código Postal*", "Teléfono", "País*", "Región*", "Activa", "Por defecto", "Backorderable", "Propagar por todas las variantes"]
           Spree::StockLocation.all.each do |location|
               sheet.add_row [location.name, location.admin_name, location.address1, location.city, location.address2, location.zipcode, location.phone, location.country.name, location.state.name, location.active ? "Sí" : "No", location.default ? "Sí" : "No", location.backorderable_default ? "Sí" : "No", location.propagate_all_variants ? "Sí" : "No" ]
           end
         end
         p.workbook.add_worksheet(:name => "Stock") do |sheet|
-          sheet.add_row ["ID Producto", "Ubicación (Nom. Interno)", "ID Variante", "Cantidad", "Backorderable"]
+          sheet.add_row ["ID Producto*", "Ubicación (Nom. Interno)", "ID Variante*", "Cantidad*", "Backorderable"]
           Spree::Product.all.each do |product|
             product.variants.each do |variant|
               variant.stock_items.each do |stock|
