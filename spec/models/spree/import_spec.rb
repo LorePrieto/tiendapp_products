@@ -40,8 +40,8 @@ RSpec.describe TiendappProducts::Import do
       expect(ot1.option_values.second.name).to eql("Vainilla")
       ot2 = product.option_types.second
       expect(ot2.name).to eql("Tamaño")
-      expect(ot2.option_values.first.name).to eql("estoy a dieta")
-      expect(ot2.option_values.second.name).to eql("gigante")
+      expect(ot2.option_values.first.name).to eql("Estoy a dieta")
+      expect(ot2.option_values.second.name).to eql("Gigante")
       #variants
       var = product.variants.first
       expect(var.sku).to eql("12345678")
@@ -53,7 +53,7 @@ RSpec.describe TiendappProducts::Import do
       val1 = var.option_values.first
       expect(val1.name).to eql("Nueces")
       val2 = var.option_values.second
-      expect(val2.name).to eql("estoy a dieta")
+      expect(val2.name).to eql("Estoy a dieta")
       #Locations
       loc = Spree::StockLocation.where(admin_name: "Central").first
       expect(loc.name).to eql("Isla Diamante")
@@ -148,7 +148,7 @@ RSpec.describe TiendappProducts::Import do
       val1 = var.option_values.first
       expect(val1.name).to eql("Nueces")
       val2 = var.option_values.second
-      expect(val2.name).to eql("estoy a dieta")
+      expect(val2.name).to eql("Estoy a dieta")
 
       #Locations
       loc = Spree::StockLocation.where(admin_name: "Central").first
@@ -217,11 +217,11 @@ RSpec.describe TiendappProducts::Import do
     end
     it "should return error if a require is missing in Propiedades" do
       m = TiendappProducts::Import.create_products('spec/fixtures/imported5.xlsx')
-      expect(m).to eql("Error de formato: en la hoja Productos fila 2 la Propiedad no puede ser vacio")
+      expect(m).to eql("Error de formato: en la hoja Propiedades fila 2 la Propiedad no puede ser vacio")
     end
     it "should return error if a require is missing in Opciones" do
       m = TiendappProducts::Import.create_products('spec/fixtures/imported6.xlsx')
-      expect(m).to eql("Error de formato: en la hoja Productos fila 2 los Valores no puede ser vacio")
+      expect(m).to eql("Error de formato: en la hoja Opciones fila 2 los Valores no puede ser vacio")
     end
     it "should return error if a require is missing in Variantes" do
       m = TiendappProducts::Import.create_products('spec/fixtures/imported7.xlsx')

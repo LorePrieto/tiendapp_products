@@ -168,8 +168,8 @@ module TiendappProducts
         message = self.check_require_properties(row, r)
         if !message
           pr = Spree::Product.where(slug: prod_dic[row[0].to_i]).first
-          property = Spree::Property.where(name: row[1].to_s, presentation: row[1].to_s).any? ? Spree::Property.where(name: row[1].to_s, presentation: row[1].to_s).first : Spree::Property.create!(name: row[1].to_s, presentation: row[1].to_s)
-          Spree::ProductProperty.where(value: row[2].to_s, product_id: pr.id, property_id: property.id).any? ? Spree::ProductProperty.where(value: row[2].to_s, product_id: pr.id, property_id: property.id).first : Spree::ProductProperty.create!(value: row[2].to_s, product_id: pr.id, property_id: property.id)
+          property = Spree::Property.where(name: row[1].to_s).any? ? Spree::Property.where(name: row[1].to_s).first : Spree::Property.create!(name: row[1].to_s, presentation: row[1].to_s)
+          Spree::ProductProperty.where(product_id: pr.id, property_id: property.id).any? ? Spree::ProductProperty.where(product_id: pr.id, property_id: property.id).first : Spree::ProductProperty.create!(value: row[2].to_s, product_id: pr.id, property_id: property.id)
         else
           return message
         end
@@ -179,11 +179,11 @@ module TiendappProducts
 
     def self.check_require_properties(row, r)
       if row[0].to_s == ""
-        return "Error de formato: en la hoja Productos fila " + r.to_s + " el ID Producto no puede ser vacio"
+        return "Error de formato: en la hoja Propiedades fila " + r.to_s + " el ID Producto no puede ser vacio"
       elsif row[1].to_s == ""
-        return "Error de formato: en la hoja Productos fila " + r.to_s + " la Propiedad no puede ser vacio"
+        return "Error de formato: en la hoja Propiedades fila " + r.to_s + " la Propiedad no puede ser vacio"
       elsif row[2].to_s == ""
-        return "Error de formato: en la hoja Productos fila " + r.to_s + " el Valor no puede ser vacio"
+        return "Error de formato: en la hoja Propiedades fila " + r.to_s + " el Valor no puede ser vacio"
       end
       return false
     end
@@ -199,7 +199,8 @@ module TiendappProducts
           Spree::ProductOptionType.where(product_id: pr.id, option_type_id: ot.id).any? ? Spree::ProductOptionType.where(product_id: pr.id, option_type_id: ot.id).first : Spree::ProductOptionType.create!(product_id: pr.id, option_type_id: ot.id)
           values = row[2].split(',')
           values.each do |v|
-            opv1 = Spree::OptionValue.where(name: v.strip, presentation: v.strip, option_type_id: ot.id).any? ? Spree::OptionValue.where(name: v.strip, presentation: v.strip, option_type_id: ot.id).first : Spree::OptionValue.create!(name: v.strip, presentation: v.strip, option_type_id: ot.id)
+            v = v.strip.downcase.capitalize
+            opv1 = Spree::OptionValue.where(name: v, option_type_id: ot.id).any? ? Spree::OptionValue.where(name: v, option_type_id: ot.id).first : Spree::OptionValue.create!(name: v, presentation: v, option_type_id: ot.id)
             opt_dic[row[0].to_i] << opv1
           end
         else
@@ -211,11 +212,11 @@ module TiendappProducts
 
     def self.check_require_options(row, r)
       if row[0].to_s == ""
-        return "Error de formato: en la hoja Productos fila " + r.to_s + " el ID Producto no puede ser vacio"
+        return "Error de formato: en la hoja Opciones fila " + r.to_s + " el ID Producto no puede ser vacio"
       elsif row[1].to_s == ""
-        return "Error de formato: en la hoja Productos fila " + r.to_s + " la Opción no puede ser vacio"
+        return "Error de formato: en la hoja Opciones fila " + r.to_s + " la Opción no puede ser vacio"
       elsif row[2].to_s == ""
-        return "Error de formato: en la hoja Productos fila " + r.to_s + " los Valores no puede ser vacio"
+        return "Error de formato: en la hoja Opciones fila " + r.to_s + " los Valores no puede ser vacio"
       end
       return false
     end
@@ -233,7 +234,6 @@ module TiendappProducts
              (row[6].to_s != "N/A" && row[6].to_s != "") ||
              (row[7].to_s != "N/A" && row[7].to_s != "") ||
              (row[8].to_s != "N/A" && row[8].to_s != "")
-            vr = Spree::Variant.where(product_id: pr.id, is_master: false).first
             if (row[3].to_s != "N/A" && row[4].to_s != "")
               vr.sku = row[3].to_s
             end
@@ -255,19 +255,26 @@ module TiendappProducts
           values = row[2].split(',')
           op_vals = opt_dic[row[1].to_i]
           values.each do |v|
+            check = false
             op_vals.each do |opt|
-              if opt.name == v.strip
-                vr.option_values << opt
+              if opt.name == v.strip.downcase.capitalize
+                if !vr.option_values.where(id: opt.id).any?
+                  vr.option_values << opt
+                end
+                check = true
                 break
               end
+            end
+            if !check
+              return "Error de formato: en la hoja Variantes fila " + r.to_s + " la opción " + v.strip + " no existe", var_dic
             end
           end
           var_dic[row[0].to_i] = vr.id
         else
           return message, var_dic
         end
-        return false, var_dic
       end
+      return false, var_dic
     end
 
     def self.check_require_variants(row, r)
@@ -290,7 +297,8 @@ module TiendappProducts
         if !message
           country = Spree::Country.where(name: row[7].to_s).any? ? Spree::Country.where(name: row[7].to_s).first : Spree::Country.create!(name: row[7].to_s, iso_name: row[7].to_s.upcase, states_required: true)
           sta = Spree::State.where(name: row[8].to_s, country_id: country.id).any? ? Spree::State.where(name: row[8].to_s, country_id: country.id).first : Spree::State.create!(name: row[8].to_s, country_id: country.id)
-          loc = Spree::StockLocation.where(admin_name: row[1].to_s == "" ? nil : row[1].to_s).any? ? Spree::StockLocation.where(admin_name: row[1].to_s).first : Spree::StockLocation.create!(name: row[0].to_s, admin_name: row[1].to_s)
+          aname = row[1].to_s == "" ? nil : row[1].to_s
+          loc = Spree::StockLocation.where(admin_name: aname).any? ? Spree::StockLocation.where(admin_name: aname).first : Spree::StockLocation.create!(name: row[0].to_s, admin_name: row[1].to_s)
           loc.address1 = row[2].to_s
           loc.city = row[3].to_s
           loc.address2 = row[4].to_s
@@ -338,7 +346,11 @@ module TiendappProducts
           item.backorderable = row[4].to_s == "" ? false : row[4].to_s == "Sí"
           item.save
           if item.count_on_hand != row[3].to_i
-            Spree::StockMovement.create!(stock_item_id: item.id, quantity: (row[3].to_i - item.count_on_hand))
+            if row[3].to_i < 0
+              return "Error: En la hoja Stock fila "+r.to_s+" la cantidad de stock es menor a 0"
+            else
+              Spree::StockMovement.create!(stock_item_id: item.id, quantity: (row[3].to_i - item.count_on_hand))
+            end
           end
         else
           return message
