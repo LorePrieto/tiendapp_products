@@ -197,7 +197,7 @@ module TiendappProducts
           pr = Spree::Product.where(slug: prod_dic[row[0].to_i]).first
           ot = Spree::OptionType.where(name: row[1].to_s).any? ? Spree::OptionType.where(name: row[1].to_s).first : Spree::OptionType.create!(name: row[1].to_s, presentation: row[1].to_s)
           Spree::ProductOptionType.where(product_id: pr.id, option_type_id: ot.id).any? ? Spree::ProductOptionType.where(product_id: pr.id, option_type_id: ot.id).first : Spree::ProductOptionType.create!(product_id: pr.id, option_type_id: ot.id)
-          values = row[2].split(',')
+          values = row[2].to_s.split(',')
           values.each do |v|
             v = v.strip.downcase.capitalize
             opv1 = Spree::OptionValue.where(name: v, option_type_id: ot.id).any? ? Spree::OptionValue.where(name: v, option_type_id: ot.id).first : Spree::OptionValue.create!(name: v, presentation: v, option_type_id: ot.id)
@@ -252,7 +252,7 @@ module TiendappProducts
           end
           vr.price = row[4].to_f
           vr.save!
-          values = row[2].split(',')
+          values = row[2].to_s.split(',')
           op_vals = opt_dic[row[1].to_i]
           values.each do |v|
             check = false
