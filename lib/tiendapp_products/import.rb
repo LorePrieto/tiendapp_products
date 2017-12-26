@@ -132,7 +132,7 @@ module TiendappProducts
           end
           taxons = row[13].to_s.split(', ')
           taxons.each do |taxon|
-            taxs = taxon.split('->')
+            taxs = taxon.to_s.split('->')
             ty = Spree::Taxonomy.where(name: taxs.first).any? ? Spree::Taxonomy.where(name: taxs.first).first : Spree::Taxonomy.create!(name: taxs.first)
             tp = Spree::Taxon.where(taxonomy_id: ty.id).first
             taxs.drop(1).each do |tax|
