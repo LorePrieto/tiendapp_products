@@ -78,6 +78,12 @@ module TiendappProducts
                 sheet.add_row [product.id, loc.admin_name, variant.id, stock.count_on_hand, stock.backorderable ? "Sí" : "No" ]
               end
             end
+            var = Spree::Variant.where(product_id: product.id, is_master: true).first
+            if var.stock_items_count > 0
+              stock = var.stock_items.first
+              loc = Spree::StockLocation.find(stock.stock_location_id)
+              sheet.add_row [product.id, loc.admin_name, var.id, stock.count_on_hand, stock.backorderable ? "Sí" : "No" ]
+            end
           end
         end
         p.serialize(path)
