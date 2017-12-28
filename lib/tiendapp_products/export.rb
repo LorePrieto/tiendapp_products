@@ -14,7 +14,13 @@ module TiendappProducts
             if taxons.any?
               tax = ""
               taxons.each do |taxon|
-                tax = taxon.permalink.gsub('/', '->') + ', ' + tax
+                thisTax = taxon.name
+                par = taxon.parent
+                while par != nil
+                  thisTax = par.name + '->' + thisTax
+                  par = par.parent
+                end
+                tax = thisTax + ', ' + tax
               end
               tax = tax[0...-2]
             else
