@@ -201,7 +201,7 @@ RSpec.describe TiendappProducts::Import do
       expect(Spree::State.count).to eql(1)
       expect(Spree::StockLocation.count).to eql(1)
       expect(Spree::StockItem.count).to eql(3)
-      expect(Spree::StockMovement.count).to eql(1)
+      expect(Spree::StockMovement.count).to eql(2)
     end
     it "should have the last stock cantity in count_on_hand" do
       #We load the same excel twice

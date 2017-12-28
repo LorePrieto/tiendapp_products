@@ -25,7 +25,7 @@ module TiendappProducts
                 m = self.locations(xlsx)
                 if !m
                   #Stock
-                  m = self.stock(xlsx, var_dic)
+                  m = self.stock(xlsx, var_dic, prod_dic)
                   if !m
                     return true
                   end
@@ -397,13 +397,18 @@ module TiendappProducts
       return false
     end
 
-    def self.stock(xlsx, var_dic)
+    def self.stock(xlsx, var_dic, prod_dic)
       ((xlsx.sheet("Stock").first_row + 1)..xlsx.sheet("Stock").last_row.to_i).each do |r|
         row = xlsx.sheet("Stock").row(r)
         message = self.check_require_stocks(row, r)
         if !message
           loc = row[1].to_s == "" ? Spree::StockLocation.first : Spree::StockLocation.where(admin_name: row[1].to_s).first
-          vr = Spree::Variant.find(var_dic[row[2].to_i])
+          if var_dic.keys.include? row[2].to_i
+            vr = Spree::Variant.find(var_dic[row[2].to_i])
+          else
+            pr = Spree::Product.where(slug: prod_dic[row[0].to_i]).first
+            vr = Spree::Variant.where(product_id: pr.id, is_master: true).first
+          end
           item = Spree::StockItem.where(stock_location_id: loc.id, variant_id: vr.id).any? ? Spree::StockItem.where(stock_location_id: loc.id, variant_id: vr.id).first : Spree::StockItem.create!(stock_location_id: loc.id, variant_id: vr.id)
           item.backorderable = row[4].to_s == "" ? false : row[4].to_s == "Sí"
           item.save
