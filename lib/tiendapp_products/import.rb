@@ -97,7 +97,7 @@ module TiendappProducts
         if !message
           sc = Spree::ShippingCategory.where(name: row[14].to_s).any? ? Spree::ShippingCategory.where(name: row[14].to_s).first : Spree::ShippingCategory.create!(name: row[14].to_s)
           if row[9].to_s == ""
-            pr = Spree::Product.where(slug: row[1].to_s.downcase .gsub(" ", "-")).any? ? Spree::Product.where(slug: row[1].to_s.downcase .gsub(" ", "-")).first : Spree::Product.create!(name: row[1].to_s, price: row[3].to_i, shipping_category_id: sc.id, slug: row[1].to_s.downcase .gsub(" ", "-"))
+            pr = Spree::Product.where(slug: row[1].to_s.downcase.gsub(" ", "-")).any? ? Spree::Product.where(slug: row[1].to_s.downcase.gsub(" ", "-")).first : Spree::Product.create!(name: row[1].to_s, price: row[3].to_i, shipping_category_id: sc.id, slug: row[1].to_s.downcase.gsub(" ", "-"))
             prod_dic[row[0].to_i] = row[1].to_s.downcase .gsub(" ", "-")
           else
             pr = Spree::Product.where(slug: row[9].to_s).any? ? Spree::Product.where(slug: row[9].to_s).first : Spree::Product.create!(name: row[1].to_s, price: row[3].to_i, shipping_category_id: sc.id, slug: row[9].to_s)
@@ -228,45 +228,107 @@ module TiendappProducts
         message = self.check_require_variants(row, r)
         if !message
           pr = Spree::Product.where(slug: prod_dic[row[1].to_i]).first
-          vr = Spree::Variant.where(is_master: false, product_id: pr.id).any? ? Spree::Variant.where(is_master: false, product_id: pr.id).first : Spree::Variant.create!(is_master: false, product_id: pr.id)
-          if (row[3].to_s != "N/A" && row[3].to_s != "") ||
-             (row[5].to_s != "N/A" && row[5].to_s != "") ||
-             (row[6].to_s != "N/A" && row[6].to_s != "") ||
-             (row[7].to_s != "N/A" && row[7].to_s != "") ||
-             (row[8].to_s != "N/A" && row[8].to_s != "")
-            if (row[3].to_s != "N/A" && row[4].to_s != "")
-              vr.sku = row[3].to_s
+          if pr.variants.any?
+            values = row[2].to_s.split(',')
+            vals = []
+            values.each do |val|
+              vals.append(val.strip.downcase.capitalize)
             end
-            if (row[5].to_s != "N/A" && row[5].to_s != "")
-              vr.weight = row[5].to_f
-            end
-            if (row[6].to_s != "N/A" && row[6].to_s != "")
-              vr.height = row[6].to_f
-            end
-            if (row[7].to_s != "N/A" && row[7].to_s != "")
-              vr.width = row[7].to_f
-            end
-            if (row[8].to_s != "N/A" && row[8].to_s != "")
-              vr.depth = row[8].to_f
-            end
-          end
-          vr.price = row[4].to_f
-          vr.save!
-          values = row[2].to_s.split(',')
-          op_vals = opt_dic[row[1].to_i]
-          values.each do |v|
-            check = false
-            op_vals.each do |opt|
-              if opt.name == v.strip.downcase.capitalize
-                if !vr.option_values.where(id: opt.id).any?
-                  vr.option_values << opt
-                end
-                check = true
+            vals2 = []
+            vr = nil
+            pr.variants.each do |var|
+              var.option_values.each do |opv|
+                vals2.append(opv.name)
+              end
+              if vals.sort == vals2.sort
+                vr =  var
                 break
               end
             end
-            if !check
-              return "Error de formato: en la hoja Variantes fila " + r.to_s + " la opción " + v.strip + " no existe", var_dic
+            if vr == nil
+              vr = Spree::Variant.create!(is_master: false, product_id: pr.id)
+              if (row[3].to_s != "N/A" && row[3].to_s != "") ||
+                 (row[5].to_s != "N/A" && row[5].to_s != "") ||
+                 (row[6].to_s != "N/A" && row[6].to_s != "") ||
+                 (row[7].to_s != "N/A" && row[7].to_s != "") ||
+                 (row[8].to_s != "N/A" && row[8].to_s != "")
+                if (row[3].to_s != "N/A" && row[4].to_s != "")
+                  vr.sku = row[3].to_s
+                end
+                if (row[5].to_s != "N/A" && row[5].to_s != "")
+                  vr.weight = row[5].to_f
+                end
+                if (row[6].to_s != "N/A" && row[6].to_s != "")
+                  vr.height = row[6].to_f
+                end
+                if (row[7].to_s != "N/A" && row[7].to_s != "")
+                  vr.width = row[7].to_f
+                end
+                if (row[8].to_s != "N/A" && row[8].to_s != "")
+                  vr.depth = row[8].to_f
+                end
+              end
+              vr.price = row[4].to_f
+              vr.save!
+              values = row[2].to_s.split(',')
+              op_vals = opt_dic[row[1].to_i]
+              values.each do |v|
+                check = false
+                op_vals.each do |opt|
+                  if opt.name == v.strip.downcase.capitalize
+                    if !vr.option_values.where(id: opt.id).any?
+                      vr.option_values << opt
+                    end
+                    check = true
+                    break
+                  end
+                end
+                if !check
+                  return "Error de formato: en la hoja Variantes fila " + r.to_s + " la opción " + v.strip + " no existe", var_dic
+                end
+              end
+            end
+          else
+            vr = Spree::Variant.create!(is_master: false, product_id: pr.id)
+            if (row[3].to_s != "N/A" && row[3].to_s != "") ||
+               (row[5].to_s != "N/A" && row[5].to_s != "") ||
+               (row[6].to_s != "N/A" && row[6].to_s != "") ||
+               (row[7].to_s != "N/A" && row[7].to_s != "") ||
+               (row[8].to_s != "N/A" && row[8].to_s != "")
+              if (row[3].to_s != "N/A" && row[4].to_s != "")
+                vr.sku = row[3].to_s
+              end
+              if (row[5].to_s != "N/A" && row[5].to_s != "")
+                vr.weight = row[5].to_f
+              end
+              if (row[6].to_s != "N/A" && row[6].to_s != "")
+                vr.height = row[6].to_f
+              end
+              if (row[7].to_s != "N/A" && row[7].to_s != "")
+                vr.width = row[7].to_f
+              end
+              if (row[8].to_s != "N/A" && row[8].to_s != "")
+                vr.depth = row[8].to_f
+              end
+            end
+            vr.price = row[4].to_f
+            vr.save!
+            values = row[2].to_s.split(',')
+            op_vals = opt_dic[row[1].to_i]
+            values.each do |v|
+              check = false
+              op_vals.each do |opt|
+                if opt.name == v.strip.downcase.capitalize
+                  if !vr.option_values.where(id: opt.id).any?
+                    vr.option_values << opt
+                  end
+                  check = true
+                  break
+                end
+              end
+              if !check
+                return "Error de formato: en la hoja Variantes fila " + r.to_s + " la opción " + v.strip + " no existe", var_dic
+              end
             end
           end
           var_dic[row[0].to_i] = vr.id
