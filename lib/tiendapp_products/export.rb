@@ -10,16 +10,17 @@ module TiendappProducts
         p.workbook.add_worksheet(:name => "Productos") do |sheet|
           sheet.add_row ["ID*", "Nombre*", "Descripción", "Precio Principal*", "SKU Producto", "Peso", "Altura", "Longitud", "Profundidad", "Slug", "Descripción Meta", "Visible", "Disponible en", "Categorías", "Categoría de Shipping*" ]
           Spree::Product.all.each do |product|
-            var = Spree::Variant.where(product_id: product.id).where(is_master: true).first
             taxons = product.taxons
             if taxons.any?
-              tax = taxons.first.permalink.gsub('/', '->')
-              taxons.drop(1).each do |taxon|
-                tax = tax + ', ' + taxon.permalink.gsub('/', '->')
+              tax = ""
+              taxons.each do |taxon|
+                tax = taxon.permalink.gsub('/', '->') + ', ' + tax
               end
+              tax = tax[0...-2]
             else
               tax = ""
             end
+            var = Spree::Variant.where(product_id: product.id).where(is_master: true).first
             if product.variants.count > 0
               sheet.add_row [product.id, product.name, product.description, product.price, "N/A", "N/A", "N/A", "N/A", "N/A", product.slug, product.meta_description, product.available? ? "Sí" : "No", product.available_on.strftime("%Y-%m-%d"), tax, product.shipping_category.name]
             else

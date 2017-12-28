@@ -110,6 +110,8 @@ RSpec.describe TiendappProducts::Export do
         t2 = Spree::Taxon.create(name:"ruru", parent_id: t1.id, taxonomy_id: ty.id)
         t3 = Spree::Taxon.create(name:"rere", parent_id: t2.id, taxonomy_id: ty.id)
         pr.taxons << t3
+        pr.taxons << t2
+        pr.taxons << t1
 
         # We ask the gem to create the excel
         TiendappProducts::Export.get_products('spec/fixtures/exported.xlsx')
@@ -117,7 +119,7 @@ RSpec.describe TiendappProducts::Export do
         # We check that the excel holds the correct values
         xlsx = Roo::Spreadsheet.open('spec/fixtures/exported.xlsx')
         #Products
-        expect(xlsx.sheet("Productos").row(2)[13]).to eql("riri->ruru->rere")
+        expect(xlsx.sheet("Productos").row(2)[13]).to eql("riri, riri->ruru, riri->ruru->rere")
       end
       it "should fail if the file to import is not a xlsx" do
         m = TiendappProducts::Export.get_products('spec/fixtures/exported.xls')
