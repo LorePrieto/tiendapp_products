@@ -28,9 +28,9 @@ module TiendappProducts
             end
             var = Spree::Variant.where(product_id: product.id).where(is_master: true).first
             if product.variants.count > 0
-              sheet.add_row [product.id, product.name, product.description, product.price, "N/A", "N/A", "N/A", "N/A", "N/A", product.slug, product.meta_description, product.available? ? "Sí" : "No", product.available_on.strftime("%Y-%m-%d"), tax, product.shipping_category.name]
+              sheet.add_row [product.id, product.name, product.description, product.price, "N/A", "N/A", "N/A", "N/A", "N/A", product.slug, product.meta_description, product.available? ? "Sí" : "No", product.available_on == nil ? "" : product.available_on.strftime("%Y-%m-%d"), tax, product.shipping_category.name]
             else
-              sheet.add_row [product.id, product.name, product.description, product.price, var.sku, var.weight, var.height, var.width, var.depth, product.slug, product.meta_description, product.available? ? "Sí" : "No", product.available_on.strftime("%Y-%m-%d"), tax, product.shipping_category.name]
+              sheet.add_row [product.id, product.name, product.description, product.price, var.sku, var.weight, var.height, var.width, var.depth, product.slug, product.meta_description, product.available? ? "Sí" : "No", product.available_on == nil ? "" : product.available_on.strftime("%Y-%m-%d"), tax, product.shipping_category.name]
             end
           end
         end
