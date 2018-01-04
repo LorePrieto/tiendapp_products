@@ -228,6 +228,8 @@ module TiendappProducts
         message = self.check_require_variants(row, r)
         if !message
           pr = Spree::Product.where(slug: prod_dic[row[1].to_i]).first
+          puts "pr.variants.any?"
+          puts pr.variants.any?
           if pr.variants.any?
             values = row[2].to_s.split(',')
             vals = []
@@ -240,9 +242,15 @@ module TiendappProducts
               var.option_values.each do |opv|
                 vals2.append(opv.name)
               end
+              puts "vals"
+              puts vals.sort
+              puts "vals2"
+              puts vals2.sort
               if vals.sort == vals2.sort
-                vr =  var
+                vr = var
                 break
+              else
+                vals2 = []
               end
             end
             if vr == nil
